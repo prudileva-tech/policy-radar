@@ -75,5 +75,54 @@
     "jurisdiction": "CZ",
     "kind": "senate",
     "url": "https://www.senat.cz/dokumenty/posledni_projednavane_tisky.php?O=15"
+  },
+  {
+    "id": "gov_lrv",
+    "name": "Vláda ČR — Legislativní rada vlády",
+    "jurisdiction": "CZ",
+    "kind": "generic_html",
+    "url": "https://vlada.gov.cz/cz/ppov/lrv/programy-zasedani-a-vasledky/"
+  },
+  {
+    "id": "gov_updates",
+    "name": "Vláda ČR — aktuální materiály",
+    "jurisdiction": "CZ",
+    "kind": "generic_html",
+    "url": "https://vlada.gov.cz/cz/media-centrum/aktualne/"
+  },
+  {
+    "id": "nukib_updates",
+    "name": "NÚKIB — aktuality a regulace",
+    "jurisdiction": "CZ",
+    "kind": "generic_html",
+    "url": "https://nukib.gov.cz/cs/infoservis/aktuality/"
+  },
+  {
+    "id": "dia_legislation",
+    "name": "DIA — legislativa",
+    "jurisdiction": "CZ",
+    "kind": "generic_html",
+    "url": "https://www.dia.gov.cz/cs/legislativa"
+  },
+  {
+    "id": "mpo_defence",
+    "name": "MPO — obranný průmysl",
+    "jurisdiction": "CZ",
+    "kind": "generic_html",
+    "url": "https://mpo.gov.cz/cz/prumysl/obranny-prumysl/"
+  },
+  {
+    "id": "mpo_dualuse",
+    "name": "MPO — dual-use / licenční správa",
+    "jurisdiction": "CZ",
+    "kind": "generic_html",
+    "url": "https://mpo.gov.cz/cz/zahranicni-obchod/licencni-sprava/"
+  },
+  {
+    "id": "esbirka",
+    "name": "e-Sbírka — aktuální předpisy",
+    "jurisdiction": "CZ",
+    "kind": "generic_html",
+    "url": "https://e-sbirka.gov.cz/"
   }
 ]
