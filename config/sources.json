@@ -1,0 +1,51 @@
+[
+  {
+    "id": "eurlex_commission_proposals",
+    "name": "EUR-Lex — Commission proposals",
+    "jurisdiction": "EU",
+    "kind": "rss",
+    "url": "https://eur-lex.europa.eu/EN/display-feed.rss?rssId=161"
+  },
+  {
+    "id": "eurlex_legislation",
+    "name": "EUR-Lex — Parliament & Council legislation",
+    "jurisdiction": "EU",
+    "kind": "rss",
+    "url": "https://eur-lex.europa.eu/EN/display-feed.rss?rssId=162"
+  },
+  {
+    "id": "council_latest",
+    "name": "Council — latest public register documents",
+    "jurisdiction": "EU",
+    "kind": "rss",
+    "url": "https://www.consilium.europa.eu/en/register/rss/LPD.xml"
+  },
+  {
+    "id": "council_coreper",
+    "name": "Council — Coreper meetings",
+    "jurisdiction": "EU",
+    "kind": "rss",
+    "url": "https://www.consilium.europa.eu/en/rss/meetings.ashx?cat=coreper"
+  },
+  {
+    "id": "council_competitiveness_wp",
+    "name": "Council — Competitiveness working parties",
+    "jurisdiction": "EU",
+    "kind": "rss",
+    "url": "https://www.consilium.europa.eu/en/rss/meetings.ashx?cat=wp-compet"
+  },
+  {
+    "id": "ep_itre",
+    "name": "European Parliament — ITRE",
+    "jurisdiction": "EU",
+    "kind": "rss",
+    "url": "https://www.europarl.europa.eu/rss/committee/itre/en.xml"
+  },
+  {
+    "id": "veklep",
+    "name": "VeKLEP — public legislative materials",
+    "jurisdiction": "CZ",
+    "kind": "veklep",
+    "url": "https://www.odok.gov.cz/portal/veklep/materialy"
+  }
+]
