@@ -1,38 +1,91 @@
 <!doctype html>
-<html lang="en">
+<html lang="cs">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Policy Radar — Free Pilot</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Policy Radar</title>
 <style>
-:root{--bg:#f6f6f2;--ink:#10110f;--muted:#6e7168;--card:#fff;--line:#dedfd7;--high:#b42318;--med:#a15c00;--accent:#17472f}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
-.wrap{max-width:1180px;margin:auto;padding:34px 22px 70px}.top{display:flex;justify-content:space-between;gap:24px;align-items:flex-end}.eyebrow{letter-spacing:.14em;text-transform:uppercase;font-size:12px;color:var(--accent);font-weight:800}.title{font-size:42px;line-height:1;margin:8px 0 7px}.sub{color:var(--muted)}.stamp{text-align:right;color:var(--muted);font-size:13px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0}.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}.num{font-size:29px;font-weight:800}.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.09em}
-.controls{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px}select,input{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit}.search{min-width:280px;flex:1}
-.grid{display:grid;grid-template-columns:2.1fr .9fr;gap:18px}.list,.side{display:flex;flex-direction:column;gap:11px}.item,.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px 18px}.meta{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px}.pill{font-size:11px;font-weight:750;border-radius:999px;padding:4px 8px;background:#f0f1eb}.pill.high{background:#fee4e2;color:var(--high)}.pill.medium{background:#fff0d4;color:var(--med)}.item h3{margin:0 0 7px;font-size:17px;line-height:1.32}.item a{color:inherit;text-decoration:none}.item a:hover{text-decoration:underline}.desc{color:var(--muted);font-size:13px;line-height:1.45}.matches{margin-top:10px;font-size:12px;color:var(--accent)}.panel h2{font-size:15px;margin:0 0 12px}.priority{padding:10px 0;border-top:1px solid var(--line)}.priority:first-of-type{border-top:0}.priority b{font-size:13px}.priority p{font-size:12px;color:var(--muted);margin:4px 0 0}.health{font-size:12px;display:flex;justify-content:space-between;gap:10px;padding:6px 0}.ok{color:#18794e}.error{color:var(--high)}.empty{padding:30px;color:var(--muted);text-align:center}.footer{margin-top:26px;color:var(--muted);font-size:12px}
-@media(max-width:800px){.stats{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.stamp{text-align:left}.title{font-size:34px}}
-</style>
-</head>
+:root{--bg:#f5f6f2;--card:#fff;--ink:#151714;--muted:#6f736b;--line:#dfe2da;--red:#b42318;--redbg:#fff0ef;--orange:#a35b00;--orangebg:#fff5e5;--green:#1d6b47;--nav:#10291f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1240px;margin:auto;padding:30px 22px 70px}.top{display:flex;justify-content:space-between;gap:24px;align-items:end}
+.kicker{font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--green)}h1{font-size:42px;margin:6px 0}.sub,.stamp{color:var(--muted);font-size:13px}.stamp{text-align:right}
+.hero{display:grid;grid-template-columns:1.15fr 1fr 1fr 1fr;gap:12px;margin:25px 0 19px}.metric{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px}.metric.action{background:var(--redbg);border-color:#f3c8c4}.metric.watch{background:var(--orangebg);border-color:#f0d1a2}.metric .n{font-size:30px;font-weight:850}.metric .l{text-transform:uppercase;letter-spacing:.08em;font-size:11px;color:var(--muted)}
+.tabs{display:flex;gap:7px;margin:5px 0 16px}.tab{border:1px solid var(--line);background:#fff;padding:10px 16px;border-radius:999px;font-weight:750;cursor:pointer}.tab.active{background:var(--nav);color:#fff;border-color:var(--nav)}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px}select,input{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 12px;font:inherit}.search{flex:1;min-width:260px}
+.layout{display:grid;grid-template-columns:2.2fr .8fr;gap:18px}.cards{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-left:6px solid #c7cbc3;border-radius:15px;padding:16px 17px}.card.action{border-left-color:var(--red)}.card.watch{border-left-color:#d97706}
+.headrow{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.badges{display:flex;flex-wrap:wrap;gap:6px}.badge{font-size:10.5px;font-weight:800;padding:4px 8px;border-radius:999px;background:#eef0eb;color:#474c45;text-transform:uppercase;letter-spacing:.04em}.badge.action{background:#fee4e2;color:var(--red)}.badge.watch{background:#fff0d6;color:var(--orange)}.badge.cz{background:#e8f0ff;color:#31558b}.badge.eu{background:#ece8ff;color:#5b4696}
+h3{margin:9px 0 7px;font-size:18px;line-height:1.3}h3 a{color:inherit;text-decoration:none}h3 a:hover{text-decoration:underline}
+.summary{font-size:13.5px;line-height:1.5;color:#444a42;margin-bottom:12px}.info{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.box{background:#f7f8f4;border-radius:10px;padding:9px 10px}.box .k{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:750}.box .v{font-size:12.5px;font-weight:700;margin-top:3px}.deadline{color:var(--red)}.why{font-size:12.5px;color:var(--green);font-weight:650;border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.side{display:flex;flex-direction:column;gap:12px}.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px}.panel h2{font-size:14px;margin:0 0 10px}.priority,.health{border-top:1px solid var(--line);padding:9px 0;font-size:12px}.priority:first-of-type,.health:first-of-type{border-top:0}.priority p{margin:4px 0;color:var(--muted);line-height:1.35}.health{display:flex;justify-content:space-between;gap:10px}.ok{color:var(--green)}.error{color:var(--red)}.empty{text-align:center;color:var(--muted);padding:30px}.footer{color:var(--muted);font-size:11.5px;margin-top:24px}
+@media(max-width:850px){.hero{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}.top{flex-direction:column;align-items:flex-start}.stamp{text-align:left}.info{grid-template-columns:1fr}.headrow{display:block}}
+</style></head>
 <body><main class="wrap">
-<div class="top"><div><div class="eyebrow">SPČR policy intelligence · pilot</div><h1 class="title">Policy Radar</h1><div class="sub">Daily CZ/EU public-source monitoring — zero-cost pilot, no paid AI.</div></div><div class="stamp" id="stamp">Loading…</div></div>
-<section class="stats"><div class="stat"><div class="num" id="sNew">–</div><div class="label">new</div></div><div class="stat"><div class="num" id="sChanged">–</div><div class="label">changed</div></div><div class="stat"><div class="num" id="sHigh">–</div><div class="label">high relevance</div></div><div class="stat"><div class="num" id="sMedium">–</div><div class="label">medium</div></div></section>
-<div class="controls"><select id="jur"><option>ALL</option><option>EU</option><option>CZ</option></select><select id="rel"><option>ALL</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select><input class="search" id="q" placeholder="Search title, source, priority…" /></div>
-<div class="grid"><section class="list" id="list"></section><aside class="side"><div class="panel"><h2>Tracked priorities</h2><div id="priorities"></div></div><div class="panel"><h2>Source health</h2><div id="health"></div></div></aside></div>
-<div class="footer">Pilot logic: official/public feeds → change detection → rule-based priority matching. AI assessment is intentionally disabled in the free phase.</div>
+<div class="top"><div><div class="kicker">SPČR · Policy Intelligence Pilot</div><h1>Policy Radar</h1><div class="sub">Co dnes vyžaduje pozornost v české a evropské legislativě.</div></div><div class="stamp" id="stamp">Načítám…</div></div>
+
+<div class="hero">
+  <div class="metric action"><div class="n" id="mAction">–</div><div class="l">🔴 Action required</div></div>
+  <div class="metric watch"><div class="n" id="mWatch">–</div><div class="l">🟠 Watch</div></div>
+  <div class="metric"><div class="n" id="mCZ">–</div><div class="l">Česká úroveň</div></div>
+  <div class="metric"><div class="n" id="mEU">–</div><div class="l">EU úroveň</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-jur="ALL">Vše</button>
+  <button class="tab" data-jur="CZ">🇨🇿 Česká republika</button>
+  <button class="tab" data-jur="EU">🇪🇺 Evropská unie</button>
+</div>
+
+<div class="toolbar">
+<select id="attention"><option value="ALL">Všechny priority</option><option value="ACTION">🔴 Action</option><option value="WATCH">🟠 Watch</option><option value="FYI">FYI</option></select>
+<select id="comment"><option value="ALL">Komentování: vše</option><option value="YES">Lze komentovat</option><option value="VERIFY">Ověřit stav</option><option value="NO_SIGNAL">Bez signálu komentování</option></select>
+<input id="q" class="search" placeholder="Hledat návrh, téma, zdroj, klíčové slovo…">
+</div>
+
+<div class="layout">
+<section class="cards" id="list"></section>
+<aside class="side">
+  <div class="panel"><h2>Sledované priority</h2><div id="priorities"></div></div>
+  <div class="panel"><h2>Zdraví zdrojů</h2><div id="health"></div></div>
+</aside>
+</div>
+<div class="footer">Červená = doporučená akce. Oranžová = sledovat / ověřit. „Lze komentovat“ se zobrazuje jen tam, kde veřejný zdroj obsahuje explicitní konzultační signál; jinak systém raději ukáže „ověřit“ nebo „bez signálu“.</div>
 </main>
+
 <script>
-let DATA=null;
+let DATA=null, JUR='ALL';
 const esc=s=>(s??'').toString().replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const commentLabel=x=>x==='YES'?'ANO':x==='VERIFY'?'OVĚŘIT':'NEZJIŠTĚNO';
+const attLabel=x=>x==='ACTION'?'ACTION':x==='WATCH'?'WATCH':'FYI';
 function render(){
- const jur=document.querySelector('#jur').value, rel=document.querySelector('#rel').value, q=document.querySelector('#q').value.toLowerCase();
- const items=DATA.items.filter(i=>(jur==='ALL'||i.jurisdiction===jur)&&(rel==='ALL'||i.relevance===rel)&&(!q||JSON.stringify(i).toLowerCase().includes(q)));
- document.querySelector('#list').innerHTML=items.length?items.map(i=>`<article class="item"><div class="meta"><span class="pill">${esc(i.jurisdiction)}</span><span class="pill">${esc(i.status)}</span><span class="pill ${i.relevance.toLowerCase()}">${esc(i.relevance)}</span><span class="pill">${esc(i.source)}</span></div><h3><a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.title)}</a></h3><div class="desc">${esc(i.text).slice(0,360)}</div>${i.matches?.length?`<div class="matches">Matches: ${i.matches.map(m=>esc(m.topic)+' ('+m.keywords.map(esc).join(', ')+')').join(' · ')}</div>`:''}</article>`).join(''):'<div class="panel empty">No matching items.</div>';
+ const att=attention.value, com=comment.value, q=document.querySelector('#q').value.toLowerCase();
+ let items=DATA.items.filter(i=>(JUR==='ALL'||i.jurisdiction===JUR)&&(att==='ALL'||i.attention===att)&&(com==='ALL'||i.commentability===com)&&(!q||JSON.stringify(i).toLowerCase().includes(q)));
+ list.innerHTML=items.length?items.map(i=>`
+ <article class="card ${(i.attention||'FYI').toLowerCase()}">
+  <div class="headrow"><div class="badges">
+   <span class="badge ${(i.attention||'FYI').toLowerCase()}">${attLabel(i.attention)}</span>
+   <span class="badge ${i.jurisdiction.toLowerCase()}">${i.jurisdiction==='CZ'?'ČR':'EU'}</span>
+   <span class="badge">${esc(i.document_type||'Policy item')}</span>
+   <span class="badge">${esc(i.status)}</span>
+  </div></div>
+  <h3><a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.title)}</a></h3>
+  <div class="summary">${esc(i.short_summary||i.text||'').slice(0,380)}</div>
+  <div class="info">
+    <div class="box"><div class="k">Komentování</div><div class="v">${commentLabel(i.commentability)}</div></div>
+    <div class="box"><div class="k">Deadline</div><div class="v ${i.comment_deadline?'deadline':''}">${esc(i.comment_deadline||'nenalezen')}</div></div>
+    <div class="box"><div class="k">Zdroj</div><div class="v">${esc(i.source)}</div></div>
+  </div>
+  <div class="why">Proč to řešit: ${esc(i.why_it_matters||'Bez přiřazené priority.')}</div>
+ </article>`).join(''):'<div class="panel empty">Žádné položky pro zvolený filtr.</div>';
 }
 fetch('./data/radar.json?'+Date.now()).then(r=>r.json()).then(d=>{
- DATA=d; const s=d.stats; sNew.textContent=s.new;sChanged.textContent=s.changed;sHigh.textContent=s.high;sMedium.textContent=s.medium;stamp.textContent='Updated '+new Date(d.generated_at).toLocaleString();
- priorities.innerHTML=d.priorities.map(p=>`<div class="priority"><b>${esc(p.id)} · ${esc(p.topic)}</b><p>${esc(p.position)}</p></div>`).join('');
- health.innerHTML=d.health.map(h=>`<div class="health"><span>${esc(h.source)}</span><span class="${h.status==='OK'?'ok':'error'}">${esc(h.status)}${h.status==='OK'?' · '+h.count:''}</span></div>`).join(''); render();
-}).catch(e=>{list.innerHTML='<div class="panel empty">No radar data yet. Run the collector once.</div>';stamp.textContent='Waiting for first run';});
-['jur','rel','q'].forEach(id=>document.querySelector('#'+id).addEventListener(id==='q'?'input':'change',render));
-</script></body></html>
+ DATA=d; const s=d.stats||{}; mAction.textContent=s.action??d.items.filter(x=>x.attention==='ACTION').length; mWatch.textContent=s.watch??d.items.filter(x=>x.attention==='WATCH').length; mCZ.textContent=s.cz??d.items.filter(x=>x.jurisdiction==='CZ').length; mEU.textContent=s.eu??d.items.filter(x=>x.jurisdiction==='EU').length;
+ stamp.textContent='Aktualizováno '+new Date(d.generated_at).toLocaleString('cs-CZ');
+ priorities.innerHTML=d.priorities.map(p=>`<div class="priority"><b>${esc(p.topic)}</b><p>${esc(p.position)}</p></div>`).join('');
+ health.innerHTML=d.health.map(h=>`<div class="health"><span>${esc(h.source)}</span><span class="${h.status==='OK'?'ok':'error'}">${esc(h.status)} · ${h.count??0}</span></div>`).join('');
+ render();
+}).catch(()=>{list.innerHTML='<div class="panel empty">Data se nepodařilo načíst.</div>';});
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');JUR=b.dataset.jur;render();});
+['attention','comment'].forEach(id=>document.querySelector('#'+id).addEventListener('change',render));
+q.addEventListener('input',render);
+</script>
+</body></html>
