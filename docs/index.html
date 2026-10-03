@@ -31,12 +31,103 @@
 <div class="layout"><section class="cards" id="list"></section><aside class="side"><div class="panel"><h2>Sledované priority</h2><div id="priorities"></div></div><div class="panel"><h2>Zdroje</h2><div id="health"></div></div></aside></div>
 <div class="footer">Historie se uchovává od spuštění pilotu. PSP aktivní tisky a nové dokumenty/pozměňovací návrhy se načítají vedle VeKLEP a Senátu; EU část běží přes EUR-Lex, Radu a EP.</div>
 </main><script>
-let DATA=null,JUR='ALL',TIME='CURRENT';
-const esc=s=>(s??'').toString().replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const dt=s=>s?new Date(s):null;
-function recent(i,days){const d=dt(i.last_changed||i.first_seen||i.published_at);return d && (Date.now()-d.getTime())<=days*86400000}
-function card(i){return `<article class="card ${(i.attention||'FYI').toLowerCase()}"><div class="badges"><span class="badge ${(i.attention||'FYI').toLowerCase()}">${esc(i.attention||'FYI')}</span><span class="badge ${(i.jurisdiction||'EU').toLowerCase()}">${i.jurisdiction==='CZ'?'ČR':'EU'}</span><span class="badge">${esc(i.document_type)}</span>${i.status!=='UNCHANGED'?'<span class="badge new">'+esc(i.status)+'</span>':''}${!i.is_current?'<span class="badge">historie</span>':''}</div><h3><a href="${esc(i.url)}" target="_blank">${esc(i.title)}</a></h3><div class="summary">${esc(i.short_summary||'')}</div><div class="info"><div class="box"><div class="k">Fáze</div><div class="v">${esc(i.procedure_stage||'neuvedena')}</div></div><div class="box"><div class="k">Komentování</div><div class="v">${i.commentability==='YES'?'ANO':i.commentability==='VERIFY'?'OVĚŘIT':'—'}</div></div><div class="box"><div class="k">Deadline</div><div class="v">${esc(i.comment_deadline||'—')}</div></div><div class="box"><div class="k">Poslední změna</div><div class="v">${i.last_changed?new Date(i.last_changed).toLocaleDateString('cs-CZ'):'—'}</div></div></div><div class="why">Proč sledovat: ${esc(i.why_it_matters||'')}</div></article>`}
-function render(){const att=attention.value,com=comment.value,q=document.querySelector('#q').value.toLowerCase();let xs=DATA.items.filter(i=>(JUR==='ALL'||i.jurisdiction===JUR)&&(att==='ALL'||i.attention===att)&&(com==='ALL'||i.commentability===com)&&(!q||JSON.stringify(i).toLowerCase().includes(q)));if(TIME==='CURRENT')xs=xs.filter(i=>i.is_current!==false);if(TIME==='TODAY')xs=xs.filter(i=>i.status==='NEW'||i.status==='CHANGED');if(TIME==='7D')xs=xs.filter(i=>recent(i,7));list.innerHTML=xs.length?xs.map(card).join(''):'<div class="panel empty">Pro tento filtr nejsou žádné položky.</div>'}
-fetch('./data/radar.json?'+Date.now()).then(r=>{if(!r.ok) throw new Error('HTTP '+r.status); return r.json()}).then(d=>{DATA=d;const s=d.stats||{};mAction.textContent=s.action||0;mWatch.textContent=s.watch||0;mNew.textContent=(s.new||0)+(s.changed||0);mCZ.textContent=(s.cz??d.items.filter(i=>i.jurisdiction==='CZ').length);mEU.textContent=(s.eu??d.items.filter(i=>i.jurisdiction==='EU').length);stamp.textContent='Aktualizováno '+new Date(d.generated_at).toLocaleString('cs-CZ');const fallbackTop=(d.top_digital_week&&d.top_digital_week.length)?d.top_digital_week:d.items.filter(i=>(i.matches||[]).some(m=>m.priority_id==='DIG-001')).slice(0,3);top3.innerHTML=fallbackTop.length?fallbackTop.map((i,n)=>`<article class="focus ${n===0?'red':n===1?'orange':'green'}"><div class="rank">#${n+1} · ${i.jurisdiction==='CZ'?'ČR':'EU'} · ${esc(i.procedure_stage||i.document_type)}</div><h2><a href="${esc(i.url)}" target="_blank">${esc(i.title)}</a></h2><p>${esc(i.short_summary||'')}</p><div class="focus-meta">${esc(i.why_it_matters||'')}${i.comment_deadline?' · deadline '+esc(i.comment_deadline):''}</div></article>`).join(''):'<div class="panel empty">Zatím nejsou tři digitální files s dostatečnými daty.</div>';priorities.innerHTML=d.priorities.map(p=>`<div class="row"><b>${esc(p.topic)}</b><p>${esc(p.position)}</p></div>`).join('');health.innerHTML=d.health.map(h=>`<div class="row health"><span>${esc(h.source)}</span><span class="${h.status==='OK'?'ok':'error'}">${esc(h.status)} · ${h.count??0}</span></div>`).join('');render()}).catch(err=>{document.getElementById('stamp').textContent='Chyba načtení dat';document.getElementById('list').innerHTML='<div class="panel empty"><b>Dashboard se nepodařilo načíst.</b><br><span style="font-size:12px">'+esc(err.message)+'</span></div>';console.error(err)});
-document.querySelectorAll('[data-jur]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-jur]').forEach(x=>x.classList.remove('active'));b.classList.add('active');JUR=b.dataset.jur;render()});document.querySelectorAll('[data-time]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-time]').forEach(x=>x.classList.remove('active'));b.classList.add('active');TIME=b.dataset.time;render()});attention.onchange=render;comment.onchange=render;q.oninput=render;
+const $ = (id) => document.getElementById(id);
+let DATA = {"generated_at":"2026-10-03T08:33:25.323909+00:00","stats":{"total":2,"new":0,"changed":0,"high":1,"medium":1,"action":1,"watch":1,"cz":0,"eu":2},"items":[{"external_id":"ST-13561-2026-INIT_EN","title":"ST 13561 2026 INIT","url":"https://data.consilium.europa.eu/doc/document/ST-13561-2026-INIT/en/pdf","text":"Regulation (EU) 2024/2847 of the European Parliament and of the Council of 23 October 2024 on horizontal cybersecurity requirements for products with digital elements and amending Regulations (EU) No 168/2013 and (EU) 2019/1020 and Directive (EU) 2020/1828 (Cyber Resilience Act)","published_at":"2026-10-01T22:00:00+00:00","source_id":"council_latest","source":"Council — latest public register documents","jurisdiction":"EU","status":"UNCHANGED","relevance":"HIGH","urgency":"MEDIUM","attention":"ACTION","document_type":"Council document","commentability":"NO_SIGNAL","comment_deadline":null,"short_summary":"Regulation (EU) 2024/2847 of the European Parliament and of the Council of 23 October 2024 on horizontal cybersecurity requirements for products with digital elements and amending Regulations (EU) No 168/2013 and (EU) 2019/1020 and Directive (EU) 2020/1828 (Cy","why_it_matters":"Matches: Defence / resilience, Digital / AI","score":15,"matches":[{"priority_id":"DIG-001","topic":"Digital / AI","owner":"SPCR pilot","keywords":["cybersecurity"],"weight":5,"position":"Prefer proportionate, harmonised and innovation-friendly digital regulation."},{"priority_id":"DEF-001","topic":"Defence / resilience","owner":"SPCR pilot","keywords":["resilience","security"],"weight":5,"position":"Support stronger European industrial capacity, preparedness and resilient supply chains."}],"detected_at":"2026-10-03T08:33:25.323909+00:00"},{"external_id":"ST-12038-2026-INIT_EN","title":"ST 12038 2026 INIT","url":"https://data.consilium.europa.eu/doc/document/ST-12038-2026-INIT/en/pdf","text":"Regulation (EU) 2025/2643 of the European Parliament and of the Council of 16 December 2025 establishing the European Defence Industry Programme and a framework of measures to ensure the timely availability and supply of defence products (‘EDIP Regulation’)","published_at":"2026-10-01T22:00:00+00:00","source_id":"council_latest","source":"Council — latest public register documents","jurisdiction":"EU","status":"UNCHANGED","relevance":"MEDIUM","urgency":"MEDIUM","attention":"WATCH","document_type":"Council document","commentability":"NO_SIGNAL","comment_deadline":null,"short_summary":"Regulation (EU) 2025/2643 of the European Parliament and of the Council of 16 December 2025 establishing the European Defence Industry Programme and a framework of measures to ensure the timely availability and supply of defence products (‘EDIP Regulation’)","why_it_matters":"Matches: Defence / resilience","score":10,"matches":[{"priority_id":"DEF-001","topic":"Defence / resilience","owner":"SPCR pilot","keywords":["defence","edip"],"weight":5,"position":"Support stronger European industrial capacity, preparedness and resilient supply chains."}],"detected_at":"2026-10-03T08:33:25.323909+00:00"}],"top_digital_week":[{"external_id":"ST-13561-2026-INIT_EN","title":"ST 13561 2026 INIT","url":"https://data.consilium.europa.eu/doc/document/ST-13561-2026-INIT/en/pdf","text":"Regulation (EU) 2024/2847 of the European Parliament and of the Council of 23 October 2024 on horizontal cybersecurity requirements for products with digital elements and amending Regulations (EU) No 168/2013 and (EU) 2019/1020 and Directive (EU) 2020/1828 (Cyber Resilience Act)","published_at":"2026-10-01T22:00:00+00:00","source_id":"council_latest","source":"Council — latest public register documents","jurisdiction":"EU","status":"UNCHANGED","relevance":"HIGH","urgency":"MEDIUM","attention":"ACTION","document_type":"Council document","commentability":"NO_SIGNAL","comment_deadline":null,"short_summary":"Regulation (EU) 2024/2847 of the European Parliament and of the Council of 23 October 2024 on horizontal cybersecurity requirements for products with digital elements and amending Regulations (EU) No 168/2013 and (EU) 2019/1020 and Directive (EU) 2020/1828 (Cy","why_it_matters":"Matches: Defence / resilience, Digital / AI","score":15,"matches":[{"priority_id":"DIG-001","topic":"Digital / AI","owner":"SPCR pilot","keywords":["cybersecurity"],"weight":5,"position":"Prefer proportionate, harmonised and innovation-friendly digital regulation."},{"priority_id":"DEF-001","topic":"Defence / resilience","owner":"SPCR pilot","keywords":["resilience","security"],"weight":5,"position":"Support stronger European industrial capacity, preparedness and resilient supply chains."}],"detected_at":"2026-10-03T08:33:25.323909+00:00"}],"health":[{"source":"EUR-Lex — Commission proposals","status":"OK","count":0,"seconds":1.99},{"source":"EUR-Lex — Parliament & Council legislation","status":"OK","count":80,"seconds":0.28},{"source":"Council — latest public register documents","status":"OK","count":80,"seconds":0.77},{"source":"Council — Coreper meetings","status":"OK","count":50,"seconds":0.22},{"source":"Council — Competitiveness working parties","status":"OK","count":50,"seconds":0.21},{"source":"European Parliament — ITRE","status":"OK","count":0,"seconds":0.38},{"source":"VeKLEP — public legislative materials","status":"OK","count":10,"seconds":0.69}],"priorities":[{"id":"DIG-001","owner":"SPCR pilot","topic":"Digital / AI","position":"Prefer proportionate, harmonised and innovation-friendly digital regulation.","keywords":["artificial intelligence","ai act","digital omnibus","data act","cloud","cybersecurity","data","software","digital services","digital markets"],"weight":5},{"id":"DEF-001","owner":"SPCR pilot","topic":"Defence / resilience","position":"Support stronger European industrial capacity, preparedness and resilient supply chains.","keywords":["defence","defense","preparedness","resilience","security","dual-use","supply chain","military mobility","edip","safe"],"weight":5},{"id":"SIM-001","owner":"SPCR pilot","topic":"Simplification","position":"Reduce duplicative reporting and unnecessary regulatory burden for businesses.","keywords":["simplification","reporting obligation","administrative burden","omnibus","competitiveness","deregulation"],"weight":4}]};
+let JUR = 'ALL';
+let TIME = 'CURRENT';
+
+function esc(s){
+  return (s ?? '').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function recent(i,days){
+  const raw=i.last_changed||i.first_seen||i.published_at||i.detected_at;
+  if(!raw) return false;
+  const d=new Date(raw);
+  return !Number.isNaN(d.getTime()) && (Date.now()-d.getTime())<=days*86400000;
+}
+function card(i){
+  const current = i.is_current !== false;
+  return `<article class="card ${(i.attention||'FYI').toLowerCase()}">
+    <div class="badges">
+      <span class="badge ${(i.attention||'FYI').toLowerCase()}">${esc(i.attention||'FYI')}</span>
+      <span class="badge ${(i.jurisdiction||'EU').toLowerCase()}">${i.jurisdiction==='CZ'?'ČR':'EU'}</span>
+      <span class="badge">${esc(i.document_type||'Policy item')}</span>
+      ${i.status && i.status!=='UNCHANGED'?'<span class="badge new">'+esc(i.status)+'</span>':''}
+      ${!current?'<span class="badge">historie</span>':''}
+    </div>
+    <h3><a href="${esc(i.url||'#')}" target="_blank" rel="noopener">${esc(i.title||'Bez názvu')}</a></h3>
+    <div class="summary">${esc(i.short_summary||i.text||'')}</div>
+    <div class="info">
+      <div class="box"><div class="k">Fáze</div><div class="v">${esc(i.procedure_stage||'neuvedena')}</div></div>
+      <div class="box"><div class="k">Komentování</div><div class="v">${i.commentability==='YES'?'ANO':i.commentability==='VERIFY'?'OVĚŘIT':'—'}</div></div>
+      <div class="box"><div class="k">Deadline</div><div class="v">${esc(i.comment_deadline||'—')}</div></div>
+      <div class="box"><div class="k">Poslední změna</div><div class="v">${(i.last_changed||i.detected_at)?new Date(i.last_changed||i.detected_at).toLocaleDateString('cs-CZ'):'—'}</div></div>
+    </div>
+    <div class="why">Proč sledovat: ${esc(i.why_it_matters||'')}</div>
+  </article>`;
+}
+function renderTop(){
+  const arr=(DATA.top_digital_week&&DATA.top_digital_week.length)
+    ? DATA.top_digital_week
+    : (DATA.items||[]).filter(i=>(i.matches||[]).some(m=>m.priority_id==='DIG-001')).slice(0,3);
+  $('top3').innerHTML=arr.length?arr.map((i,n)=>`
+    <article class="focus ${n===0?'red':n===1?'orange':'green'}">
+      <div class="rank">#${n+1} · ${i.jurisdiction==='CZ'?'ČR':'EU'} · ${esc(i.procedure_stage||i.document_type||'')}</div>
+      <h2><a href="${esc(i.url||'#')}" target="_blank" rel="noopener">${esc(i.title||'')}</a></h2>
+      <p>${esc(i.short_summary||i.text||'')}</p>
+      <div class="focus-meta">${esc(i.why_it_matters||'')}${i.comment_deadline?' · deadline '+esc(i.comment_deadline):''}</div>
+    </article>`).join('')
+    : '<div class="panel empty">Zatím nejsou tři digitální files s dostatečnými daty.</div>';
+}
+function render(){
+  const att=$('attention').value;
+  const com=$('comment').value;
+  const q=$('q').value.toLowerCase();
+  let xs=(DATA.items||[]).filter(i =>
+    (JUR==='ALL'||i.jurisdiction===JUR) &&
+    (att==='ALL'||i.attention===att) &&
+    (com==='ALL'||i.commentability===com) &&
+    (!q||JSON.stringify(i).toLowerCase().includes(q))
+  );
+  if(TIME==='CURRENT') xs=xs.filter(i=>i.is_current!==false);
+  if(TIME==='TODAY') xs=xs.filter(i=>i.status==='NEW'||i.status==='CHANGED');
+  if(TIME==='7D') xs=xs.filter(i=>recent(i,7));
+  $('list').innerHTML=xs.length?xs.map(card).join(''):'<div class="panel empty">Pro tento filtr nejsou žádné položky.</div>';
+}
+function hydrate(d){
+  DATA=d||DATA;
+  const s=DATA.stats||{};
+  $('mAction').textContent=s.action??(DATA.items||[]).filter(i=>i.attention==='ACTION').length;
+  $('mWatch').textContent=s.watch??(DATA.items||[]).filter(i=>i.attention==='WATCH').length;
+  $('mNew').textContent=(s.new??0)+(s.changed??0);
+  $('mCZ').textContent=s.cz??(DATA.items||[]).filter(i=>i.jurisdiction==='CZ').length;
+  $('mEU').textContent=s.eu??(DATA.items||[]).filter(i=>i.jurisdiction==='EU').length;
+  $('stamp').textContent='Aktualizováno '+new Date(DATA.generated_at||Date.now()).toLocaleString('cs-CZ');
+  $('priorities').innerHTML=(DATA.priorities||[]).map(p=>`<div class="row"><b>${esc(p.topic)}</b><p>${esc(p.position)}</p></div>`).join('');
+  $('health').innerHTML=(DATA.health||[]).map(x=>`<div class="row health"><span>${esc(x.source)}</span><span class="${x.status==='OK'?'ok':'error'}">${esc(x.status)} · ${x.count??0}</span></div>`).join('');
+  renderTop(); render();
+}
+
+// Render embedded fallback immediately: no blank screen even if network fails.
+hydrate(DATA);
+
+fetch('./data/radar.json?ts='+Date.now(), {cache:'no-store'})
+  .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+  .then(hydrate)
+  .catch(err=>{
+    $('stamp').textContent='Zobrazuji poslední dostupná data';
+    console.error(err);
+  });
+
+document.querySelectorAll('[data-jur]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[data-jur]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); JUR=b.dataset.jur; render();
+}));
+document.querySelectorAll('[data-time]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('[data-time]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); TIME=b.dataset.time; render();
+}));
+$('attention').addEventListener('change',render);
+$('comment').addEventListener('change',render);
+$('q').addEventListener('input',render);
 </script></body></html>
