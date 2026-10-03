@@ -65,6 +65,65 @@ def fetch_veklep(source):
         rows.append({"external_id": external_id, "title": title[:500], "url": url, "text": title, "published_at": None})
     return rows[:100]
 
+def infer_metadata(source, title: str, text: str):
+    hay = f"{title} {text}".lower()
+
+    # Human-readable document type. This is intentionally heuristic in the free pilot.
+    if source["id"] == "veklep":
+        doc_type = "CZ legislative material"
+    elif "coreper" in source["id"]:
+        doc_type = "COREPER agenda / meeting item"
+    elif "working parties" in source["name"].lower() or "wp" in source["id"]:
+        doc_type = "Council working party item"
+    elif "council_latest" == source["id"]:
+        doc_type = "Council document"
+    elif "eurlex" in source["id"]:
+        if "directive" in hay:
+            doc_type = "EU directive / related act"
+        elif "regulation" in hay:
+            doc_type = "EU regulation / related act"
+        elif "decision" in hay:
+            doc_type = "EU decision / related act"
+        else:
+            doc_type = "EUR-Lex legal document"
+    elif "ep_" in source["id"]:
+        doc_type = "European Parliament item"
+    else:
+        doc_type = "Policy document"
+
+    # Commentability: only assert YES when the feed text itself signals a consultation/call.
+    consultation_words = ["consultation", "call for evidence", "feedback period", "public consultation",
+                          "připomínkové řízení", "meziresortní připomínkové řízení", "připomínky do"]
+    if any(w in hay for w in consultation_words):
+        commentability = "YES"
+    elif source["id"] == "veklep":
+        commentability = "VERIFY"
+    else:
+        commentability = "NO_SIGNAL"
+
+    # Best-effort deadline extraction near words such as deadline / until / do.
+    deadline = None
+    patterns = [
+        r"(?:deadline|until|by)\s*[:\-]?\s*(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})",
+        r"(?:deadline|until|by)\s*[:\-]?\s*([A-Za-z]+\s+\d{1,2},?\s+\d{4})",
+        r"(?:připomínky\s+do|lhůta\s+do|do)\s+(\d{1,2}[.]\s*\d{1,2}[.]\s*\d{4})"
+    ]
+    for p in patterns:
+        m = re.search(p, hay, flags=re.IGNORECASE)
+        if m:
+            deadline = m.group(1)
+            break
+
+    # Short deterministic summary for the free phase.
+    summary = clean(text)[:260]
+    if not summary:
+        if "meeting" in doc_type.lower() or "agenda" in doc_type.lower() or "working party" in doc_type.lower():
+            summary = "Upcoming EU meeting or working-party item. Open the source for agenda and supporting documents."
+        else:
+            summary = "New or updated public policy item. Open the source for the full document and procedural context."
+
+    return doc_type, commentability, deadline, summary
+
 def classify(title: str, text: str):
     hay = f"{title} {text}".lower()
     matches, score = [], 0
@@ -112,10 +171,44 @@ def main():
             status = "NEW" if previous is None else ("CHANGED" if previous != fingerprint else "UNCHANGED")
             next_state[key] = fingerprint
             relevance, urgency, matches, score = classify(row["title"], row["text"])
+            doc_type, commentability, deadline, short_summary = infer_metadata(source, row["title"], row["text"])
+
+            attention = "FYI"
+            if relevance == "HIGH" or (urgency == "HIGH" and relevance != "LOW"):
+                attention = "ACTION"
+            elif relevance == "MEDIUM" or urgency == "MEDIUM" or commentability == "YES":
+                attention = "WATCH"
+
+            reason = "No tracked priority matched yet."
+            if matches:
+                reason = "Matches: " + ", ".join(sorted({m["topic"] for m in matches}))
+            if commentability == "YES":
+                reason += " · Public/explicit commenting signal detected."
+            elif commentability == "VERIFY":
+                reason += " · Check VeKLEP procedure for commenting status."
+
             if status == "UNCHANGED" and relevance == "LOW":
                 continue
-            items.append({**row, "source_id": source["id"], "source": source["name"], "jurisdiction": source["jurisdiction"], "status": status, "relevance": relevance, "urgency": urgency, "score": score, "matches": matches, "detected_at": now})
-    items.sort(key=lambda x: (x["status"] != "NEW", {"HIGH":0,"MEDIUM":1,"LOW":2}[x["relevance"]], x["title"].lower()))
+            items.append({
+                **row,
+                "source_id": source["id"],
+                "source": source["name"],
+                "jurisdiction": source["jurisdiction"],
+                "status": status,
+                "relevance": relevance,
+                "urgency": urgency,
+                "attention": attention,
+                "document_type": doc_type,
+                "commentability": commentability,
+                "comment_deadline": deadline,
+                "short_summary": short_summary,
+                "why_it_matters": reason,
+                "score": score,
+                "matches": matches,
+                "detected_at": now
+            })
+    attention_rank = {"ACTION": 0, "WATCH": 1, "FYI": 2}
+    items.sort(key=lambda x: (attention_rank.get(x["attention"], 9), x["status"] != "NEW", {"HIGH":0,"MEDIUM":1,"LOW":2}[x["relevance"]], x["title"].lower()))
     payload = {
         "generated_at": now,
         "mode": "free-pilot-no-ai",
@@ -124,7 +217,11 @@ def main():
             "new": sum(i["status"] == "NEW" for i in items),
             "changed": sum(i["status"] == "CHANGED" for i in items),
             "high": sum(i["relevance"] == "HIGH" for i in items),
-            "medium": sum(i["relevance"] == "MEDIUM" for i in items)
+            "medium": sum(i["relevance"] == "MEDIUM" for i in items),
+            "action": sum(i["attention"] == "ACTION" for i in items),
+            "watch": sum(i["attention"] == "WATCH" for i in items),
+            "cz": sum(i["jurisdiction"] == "CZ" for i in items),
+            "eu": sum(i["jurisdiction"] == "EU" for i in items)
         },
         "health": health,
         "items": items[:300],
