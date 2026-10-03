@@ -187,8 +187,6 @@ def main():
             elif commentability == "VERIFY":
                 reason += " · Check VeKLEP procedure for commenting status."
 
-            if status == "UNCHANGED" and relevance == "LOW":
-                continue
             items.append({
                 **row,
                 "source_id": source["id"],
@@ -209,6 +207,22 @@ def main():
             })
     attention_rank = {"ACTION": 0, "WATCH": 1, "FYI": 2}
     items.sort(key=lambda x: (attention_rank.get(x["attention"], 9), x["status"] != "NEW", {"HIGH":0,"MEDIUM":1,"LOW":2}[x["relevance"]], x["title"].lower()))
+    # Keep all relevant/changed items, plus a recent baseline from each jurisdiction
+    # so the dashboard never looks empty just because nothing urgent changed today.
+    important = [i for i in items if i["attention"] != "FYI" or i["status"] in ("NEW", "CHANGED")]
+    def baseline(jurisdiction, limit=18):
+        rows = [i for i in items if i["jurisdiction"] == jurisdiction]
+        rows.sort(key=lambda x: (x.get("published_at") or x.get("detected_at") or ""), reverse=True)
+        return rows[:limit]
+    merged = []
+    seen = set()
+    for i in important + baseline("CZ") + baseline("EU"):
+        key = (i["source_id"], i["external_id"])
+        if key not in seen:
+            seen.add(key)
+            merged.append(i)
+    items = merged
+
     payload = {
         "generated_at": now,
         "mode": "free-pilot-no-ai",
@@ -221,7 +235,9 @@ def main():
             "action": sum(i["attention"] == "ACTION" for i in items),
             "watch": sum(i["attention"] == "WATCH" for i in items),
             "cz": sum(i["jurisdiction"] == "CZ" for i in items),
-            "eu": sum(i["jurisdiction"] == "EU" for i in items)
+            "eu": sum(i["jurisdiction"] == "EU" for i in items),
+            "cz_source_total": sum(h.get("count", 0) for h in health if "VeKLEP" in h.get("source","")),
+            "eu_source_total": sum(h.get("count", 0) for h in health if "VeKLEP" not in h.get("source",""))
         },
         "health": health,
         "items": items[:300],
