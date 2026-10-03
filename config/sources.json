@@ -47,5 +47,33 @@
     "jurisdiction": "CZ",
     "kind": "veklep",
     "url": "https://www.odok.gov.cz/portal/veklep/materialy"
+  },
+  {
+    "id": "psp_active_bills",
+    "name": "PSP — aktivní návrhy zákonů",
+    "jurisdiction": "CZ",
+    "kind": "psp",
+    "url": "https://www.psp.cz/sqw/text/tisky.sqw?stz=1"
+  },
+  {
+    "id": "psp_new_docs",
+    "name": "PSP — nové dokumenty a pozměňovací návrhy",
+    "jurisdiction": "CZ",
+    "kind": "psp",
+    "url": "https://www.psp.cz/sqw/text/tisky.sqw?tx=1"
+  },
+  {
+    "id": "senate_pending",
+    "name": "Senát — zařazené neprojednané tisky",
+    "jurisdiction": "CZ",
+    "kind": "senate",
+    "url": "https://www.senat.cz/dokumenty/zarazene_neprojednavane_tisky.php?O=15"
+  },
+  {
+    "id": "senate_recent",
+    "name": "Senát — poslední projednávané tisky",
+    "jurisdiction": "CZ",
+    "kind": "senate",
+    "url": "https://www.senat.cz/dokumenty/posledni_projednavane_tisky.php?O=15"
   }
 ]
