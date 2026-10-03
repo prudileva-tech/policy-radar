@@ -1,16 +1,17 @@
 {
-  "generated_at": "2026-10-03T08:33:25.323909+00:00",
+  "generated_at": "2026-10-03T09:01:12.826Z",
   "mode": "free-pilot-no-ai",
   "stats": {
-    "total": 2,
-    "new": 0,
+    "total": 8,
+    "new": 6,
     "changed": 0,
     "high": 1,
     "medium": 1,
-    "action": 1,
-    "watch": 1,
-    "cz": 0,
-    "eu": 2
+    "action": 2,
+    "watch": 2,
+    "cz": 6,
+    "eu": 2,
+    "current": 8
   },
   "health": [
     {
@@ -58,6 +59,264 @@
   ],
   "items": [
     {
+      "external_id": "cz-seed-ai-law-2026",
+      "title": "Návrh zákona o umělé inteligenci",
+      "url": "https://vlada.gov.cz/",
+      "text": "Návrh zákona o umělé inteligenci a související změna zákona o dozoru nad trhem s výrobky. Aktivní legislativní file v české pipeline.",
+      "published_at": "2026-08-01T00:00:00+00:00",
+      "procedure_stage": "Legislativní rada vlády / další projednávání",
+      "source_doc_type": "Návrh zákona",
+      "seed_source": "Vláda ČR / legislativní plán",
+      "key": "verified_seed::cz-seed-ai-law-2026",
+      "source_id": "verified_seed",
+      "source": "Vláda ČR / legislativní plán",
+      "jurisdiction": "CZ",
+      "status": "NEW",
+      "relevance": "LOW",
+      "urgency": "MEDIUM",
+      "attention": "FYI",
+      "document_type": "Návrh zákona",
+      "commentability": "NO_SIGNAL",
+      "comment_deadline": null,
+      "short_summary": "Návrh zákona o umělé inteligenci a související změna zákona o dozoru nad trhem s výrobky. Aktivní legislativní file v české pipeline.",
+      "why_it_matters": "Aktuální český policy/regulatory file.",
+      "score": 0,
+      "matches": [],
+      "first_seen": "2026-10-03T09:01:12.826Z",
+      "last_seen": "2026-10-03T09:01:12.826Z",
+      "last_changed": "2026-10-03T09:01:12.826Z",
+      "is_current": true,
+      "events": [
+        {
+          "at": "2026-10-03T09:01:12.826Z",
+          "type": "NEW",
+          "title": "Návrh zákona o umělé inteligenci",
+          "stage": "Legislativní rada vlády / další projednávání"
+        }
+      ]
+    },
+    {
+      "external_id": "cz-seed-gov-ict-ai-699-26",
+      "title": "Řízení výdajů v oblasti informačních a komunikačních technologií a umělé inteligence",
+      "url": "https://vlada.gov.cz/cz/media-centrum/aktualne/vysledky-jednani-vlady-14--zari-2026-228778/",
+      "text": "Materiál čj. 699/26 schválený vládou dne 14. září 2026; týká se řízení výdajů v oblasti ICT a AI.",
+      "published_at": "2026-09-14T00:00:00+00:00",
+      "procedure_stage": "Schváleno vládou",
+      "source_doc_type": "Vládní materiál",
+      "seed_source": "Vláda ČR",
+      "key": "verified_seed::cz-seed-gov-ict-ai-699-26",
+      "source_id": "verified_seed",
+      "source": "Vláda ČR",
+      "jurisdiction": "CZ",
+      "status": "NEW",
+      "relevance": "HIGH",
+      "urgency": "MEDIUM",
+      "attention": "ACTION",
+      "document_type": "Vládní materiál",
+      "commentability": "NO_SIGNAL",
+      "comment_deadline": null,
+      "short_summary": "Materiál čj. 699/26 schválený vládou dne 14. září 2026; týká se řízení výdajů v oblasti ICT a AI.",
+      "why_it_matters": "Shoda s prioritami: Digital / AI",
+      "score": 15,
+      "matches": [
+        {
+          "priority_id": "DIG-001",
+          "topic": "Digital / AI",
+          "owner": "SPCR pilot",
+          "keywords": [
+            "AI",
+            "ICT",
+            "informačních a komunikačních technologií"
+          ],
+          "weight": 5,
+          "position": "Prefer proportionate, harmonised and innovation-friendly digital regulation."
+        }
+      ],
+      "first_seen": "2026-10-03T09:01:12.826Z",
+      "last_seen": "2026-10-03T09:01:12.826Z",
+      "last_changed": "2026-10-03T09:01:12.826Z",
+      "is_current": true,
+      "events": [
+        {
+          "at": "2026-10-03T09:01:12.826Z",
+          "type": "NEW",
+          "title": "Řízení výdajů v oblasti informačních a komunikačních technologií a umělé inteligence",
+          "stage": "Schváleno vládou"
+        }
+      ]
+    },
+    {
+      "external_id": "cz-seed-critical-infra-portal-178-2026",
+      "title": "Vyhláška č. 178/2026 Sb. o portálu kritické infrastruktury",
+      "url": "https://e-sbirka.gov.cz/",
+      "text": "Prováděcí vyhláška k portálu kritické infrastruktury, vyhlášená 30. září 2026 a účinná od 1. října 2026.",
+      "published_at": "2026-09-30T00:00:00+00:00",
+      "procedure_stage": "Vyhlášeno / účinné",
+      "source_doc_type": "Vyhláška",
+      "seed_source": "e-Sbírka",
+      "key": "verified_seed::cz-seed-critical-infra-portal-178-2026",
+      "source_id": "verified_seed",
+      "source": "e-Sbírka",
+      "jurisdiction": "CZ",
+      "status": "NEW",
+      "relevance": "LOW",
+      "urgency": "MEDIUM",
+      "attention": "FYI",
+      "document_type": "Vyhláška",
+      "commentability": "NO_SIGNAL",
+      "comment_deadline": null,
+      "short_summary": "Prováděcí vyhláška k portálu kritické infrastruktury, vyhlášená 30. září 2026 a účinná od 1. října 2026.",
+      "why_it_matters": "Aktuální český policy/regulatory file.",
+      "score": 0,
+      "matches": [],
+      "first_seen": "2026-10-03T09:01:12.826Z",
+      "last_seen": "2026-10-03T09:01:12.826Z",
+      "last_changed": "2026-10-03T09:01:12.826Z",
+      "is_current": true,
+      "events": [
+        {
+          "at": "2026-10-03T09:01:12.826Z",
+          "type": "NEW",
+          "title": "Vyhláška č. 178/2026 Sb. o portálu kritické infrastruktury",
+          "stage": "Vyhlášeno / účinné"
+        }
+      ]
+    },
+    {
+      "external_id": "cz-seed-defence-industrial-coop-20260924",
+      "title": "Programy průmyslové spolupráce v obranném průmyslu",
+      "url": "https://mpo.gov.cz/cz/prumysl/obranny-prumysl/spoluprace-s-domacim-prumyslem/programy-prumyslove-spoluprace--294692/",
+      "text": "MPO zveřejnilo 24. září 2026 rámec programů průmyslové spolupráce se zaměřením na bezpečnost dodávek, zapojení domácího průmyslu a dodavatelské řetězce.",
+      "published_at": "2026-09-24T00:00:00+00:00",
+      "procedure_stage": "Aktuální policy / implementace",
+      "source_doc_type": "Policy materiál",
+      "seed_source": "MPO",
+      "key": "verified_seed::cz-seed-defence-industrial-coop-20260924",
+      "source_id": "verified_seed",
+      "source": "MPO",
+      "jurisdiction": "CZ",
+      "status": "NEW",
+      "relevance": "LOW",
+      "urgency": "MEDIUM",
+      "attention": "FYI",
+      "document_type": "Policy materiál",
+      "commentability": "NO_SIGNAL",
+      "comment_deadline": null,
+      "short_summary": "MPO zveřejnilo 24. září 2026 rámec programů průmyslové spolupráce se zaměřením na bezpečnost dodávek, zapojení domácího průmyslu a dodavatelské řetězce.",
+      "why_it_matters": "Shoda s prioritami: Defence / dual-use / resilience",
+      "score": 5,
+      "matches": [
+        {
+          "priority_id": "DEF-001",
+          "topic": "Defence / dual-use / resilience",
+          "owner": "SPCR pilot",
+          "keywords": [
+            "bezpečnost dodávek"
+          ],
+          "weight": 5,
+          "position": "Support stronger European industrial capacity, preparedness and resilient supply chains."
+        }
+      ],
+      "first_seen": "2026-10-03T09:01:12.826Z",
+      "last_seen": "2026-10-03T09:01:12.826Z",
+      "last_changed": "2026-10-03T09:01:12.826Z",
+      "is_current": true,
+      "events": [
+        {
+          "at": "2026-10-03T09:01:12.826Z",
+          "type": "NEW",
+          "title": "Programy průmyslové spolupráce v obranném průmyslu",
+          "stage": "Aktuální policy / implementace"
+        }
+      ]
+    },
+    {
+      "external_id": "cz-seed-diana-20260924",
+      "title": "Obranný akcelerátor DIANA — technologie dvojího užití",
+      "url": "https://mpo.gov.cz/cz/prumysl/obranny-prumysl/spoluprace-s-domacim-prumyslem/obranny-akcelerator-diana--294690/",
+      "text": "Aktuální informace MPO k NATO DIANA a podpoře nastupujících a přelomových technologií dvojího užití s obrannou aplikací.",
+      "published_at": "2026-09-24T00:00:00+00:00",
+      "procedure_stage": "Program / příležitosti pro firmy",
+      "source_doc_type": "Defence / dual-use program",
+      "seed_source": "MPO",
+      "key": "verified_seed::cz-seed-diana-20260924",
+      "source_id": "verified_seed",
+      "source": "MPO",
+      "jurisdiction": "CZ",
+      "status": "NEW",
+      "relevance": "MEDIUM",
+      "urgency": "MEDIUM",
+      "attention": "WATCH",
+      "document_type": "Defence / dual-use program",
+      "commentability": "NO_SIGNAL",
+      "comment_deadline": null,
+      "short_summary": "Aktuální informace MPO k NATO DIANA a podpoře nastupujících a přelomových technologií dvojího užití s obrannou aplikací.",
+      "why_it_matters": "Shoda s prioritami: Defence / dual-use / resilience",
+      "score": 10,
+      "matches": [
+        {
+          "priority_id": "DEF-001",
+          "topic": "Defence / dual-use / resilience",
+          "owner": "SPCR pilot",
+          "keywords": [
+            "dvojího užití",
+            "DIANA"
+          ],
+          "weight": 5,
+          "position": "Support stronger European industrial capacity, preparedness and resilient supply chains."
+        }
+      ],
+      "first_seen": "2026-10-03T09:01:12.826Z",
+      "last_seen": "2026-10-03T09:01:12.826Z",
+      "last_changed": "2026-10-03T09:01:12.826Z",
+      "is_current": true,
+      "events": [
+        {
+          "at": "2026-10-03T09:01:12.826Z",
+          "type": "NEW",
+          "title": "Obranný akcelerátor DIANA — technologie dvojího užití",
+          "stage": "Program / příležitosti pro firmy"
+        }
+      ]
+    },
+    {
+      "external_id": "cz-seed-defence-industry-20260930",
+      "title": "Spolupráce s domácím obranným a bezpečnostním průmyslem",
+      "url": "https://mpo.gov.cz/cz/prumysl/obranny-prumysl/spoluprace-s-domacim-prumyslem/spoluprace-s-domacim-prumyslem--294768/",
+      "text": "MPO 30. září 2026 aktualizovalo rámec podpory domácího obranného a bezpečnostního průmyslu, kapacit a bezpečnosti dodávek.",
+      "published_at": "2026-09-30T00:00:00+00:00",
+      "procedure_stage": "Aktuální policy / implementace",
+      "source_doc_type": "Defence policy",
+      "seed_source": "MPO",
+      "key": "verified_seed::cz-seed-defence-industry-20260930",
+      "source_id": "verified_seed",
+      "source": "MPO",
+      "jurisdiction": "CZ",
+      "status": "NEW",
+      "relevance": "LOW",
+      "urgency": "MEDIUM",
+      "attention": "FYI",
+      "document_type": "Defence policy",
+      "commentability": "NO_SIGNAL",
+      "comment_deadline": null,
+      "short_summary": "MPO 30. září 2026 aktualizovalo rámec podpory domácího obranného a bezpečnostního průmyslu, kapacit a bezpečnosti dodávek.",
+      "why_it_matters": "Aktuální český policy/regulatory file.",
+      "score": 0,
+      "matches": [],
+      "first_seen": "2026-10-03T09:01:12.826Z",
+      "last_seen": "2026-10-03T09:01:12.826Z",
+      "last_changed": "2026-10-03T09:01:12.826Z",
+      "is_current": true,
+      "events": [
+        {
+          "at": "2026-10-03T09:01:12.826Z",
+          "type": "NEW",
+          "title": "Spolupráce s domácím obranným a bezpečnostním průmyslem",
+          "stage": "Aktuální policy / implementace"
+        }
+      ]
+    },
+    {
       "external_id": "ST-13561-2026-INIT_EN",
       "title": "ST 13561 2026 INIT",
       "url": "https://data.consilium.europa.eu/doc/document/ST-13561-2026-INIT/en/pdf",
@@ -99,7 +358,8 @@
           "position": "Support stronger European industrial capacity, preparedness and resilient supply chains."
         }
       ],
-      "detected_at": "2026-10-03T08:33:25.323909+00:00"
+      "detected_at": "2026-10-03T08:33:25.323909+00:00",
+      "is_current": true
     },
     {
       "external_id": "ST-12038-2026-INIT_EN",
@@ -133,7 +393,8 @@
           "position": "Support stronger European industrial capacity, preparedness and resilient supply chains."
         }
       ],
-      "detected_at": "2026-10-03T08:33:25.323909+00:00"
+      "detected_at": "2026-10-03T08:33:25.323909+00:00",
+      "is_current": true
     }
   ],
   "priorities": [
@@ -152,14 +413,31 @@
         "data",
         "software",
         "digital services",
-        "digital markets"
+        "digital markets",
+        "umělá inteligence",
+        "zákon o umělé inteligenci",
+        "digitální ekonomika",
+        "digitální služby",
+        "správa dat",
+        "cloud computing",
+        "kybernetická bezpečnost",
+        "kybernetické bezpečnosti",
+        "kritická infrastruktura",
+        "informační systémy",
+        "elektronická identita",
+        "digitální identita",
+        "cyber resilience act",
+        "CRA",
+        "AI",
+        "ICT",
+        "informačních a komunikačních technologií"
       ],
       "weight": 5
     },
     {
       "id": "DEF-001",
       "owner": "SPCR pilot",
-      "topic": "Defence / resilience",
+      "topic": "Defence / dual-use / resilience",
       "position": "Support stronger European industrial capacity, preparedness and resilient supply chains.",
       "keywords": [
         "defence",
@@ -171,7 +449,24 @@
         "supply chain",
         "military mobility",
         "edip",
-        "safe"
+        "safe",
+        "obranný průmysl",
+        "obranného průmyslu",
+        "obranně-průmyslov",
+        "vojenský materiál",
+        "vojenského materiálu",
+        "dvojího použití",
+        "dvojího užití",
+        "dual use",
+        "vývozní kontrola",
+        "export control",
+        "kritická infrastruktura",
+        "odolnost",
+        "obranyschopnost",
+        "bezpečnost dodávek",
+        "DIANA",
+        "EDT",
+        "emerging technologies"
       ],
       "weight": 5
     },
@@ -189,6 +484,103 @@
         "deregulation"
       ],
       "weight": 4
+    }
+  ],
+  "top_digital_week": [
+    {
+      "external_id": "cz-seed-gov-ict-ai-699-26",
+      "title": "Řízení výdajů v oblasti informačních a komunikačních technologií a umělé inteligence",
+      "url": "https://vlada.gov.cz/cz/media-centrum/aktualne/vysledky-jednani-vlady-14--zari-2026-228778/",
+      "text": "Materiál čj. 699/26 schválený vládou dne 14. září 2026; týká se řízení výdajů v oblasti ICT a AI.",
+      "published_at": "2026-09-14T00:00:00+00:00",
+      "procedure_stage": "Schváleno vládou",
+      "source_doc_type": "Vládní materiál",
+      "seed_source": "Vláda ČR",
+      "key": "verified_seed::cz-seed-gov-ict-ai-699-26",
+      "source_id": "verified_seed",
+      "source": "Vláda ČR",
+      "jurisdiction": "CZ",
+      "status": "NEW",
+      "relevance": "HIGH",
+      "urgency": "MEDIUM",
+      "attention": "ACTION",
+      "document_type": "Vládní materiál",
+      "commentability": "NO_SIGNAL",
+      "comment_deadline": null,
+      "short_summary": "Materiál čj. 699/26 schválený vládou dne 14. září 2026; týká se řízení výdajů v oblasti ICT a AI.",
+      "why_it_matters": "Shoda s prioritami: Digital / AI",
+      "score": 15,
+      "matches": [
+        {
+          "priority_id": "DIG-001",
+          "topic": "Digital / AI",
+          "owner": "SPCR pilot",
+          "keywords": [
+            "AI",
+            "ICT",
+            "informačních a komunikačních technologií"
+          ],
+          "weight": 5,
+          "position": "Prefer proportionate, harmonised and innovation-friendly digital regulation."
+        }
+      ],
+      "first_seen": "2026-10-03T09:01:12.826Z",
+      "last_seen": "2026-10-03T09:01:12.826Z",
+      "last_changed": "2026-10-03T09:01:12.826Z",
+      "is_current": true,
+      "events": [
+        {
+          "at": "2026-10-03T09:01:12.826Z",
+          "type": "NEW",
+          "title": "Řízení výdajů v oblasti informačních a komunikačních technologií a umělé inteligence",
+          "stage": "Schváleno vládou"
+        }
+      ]
+    },
+    {
+      "external_id": "ST-13561-2026-INIT_EN",
+      "title": "ST 13561 2026 INIT",
+      "url": "https://data.consilium.europa.eu/doc/document/ST-13561-2026-INIT/en/pdf",
+      "text": "Regulation (EU) 2024/2847 of the European Parliament and of the Council of 23 October 2024 on horizontal cybersecurity requirements for products with digital elements and amending Regulations (EU) No 168/2013 and (EU) 2019/1020 and Directive (EU) 2020/1828 (Cyber Resilience Act)",
+      "published_at": "2026-10-01T22:00:00+00:00",
+      "source_id": "council_latest",
+      "source": "Council — latest public register documents",
+      "jurisdiction": "EU",
+      "status": "UNCHANGED",
+      "relevance": "HIGH",
+      "urgency": "MEDIUM",
+      "attention": "ACTION",
+      "document_type": "Council document",
+      "commentability": "NO_SIGNAL",
+      "comment_deadline": null,
+      "short_summary": "Regulation (EU) 2024/2847 of the European Parliament and of the Council of 23 October 2024 on horizontal cybersecurity requirements for products with digital elements and amending Regulations (EU) No 168/2013 and (EU) 2019/1020 and Directive (EU) 2020/1828 (Cy",
+      "why_it_matters": "Matches: Defence / resilience, Digital / AI",
+      "score": 15,
+      "matches": [
+        {
+          "priority_id": "DIG-001",
+          "topic": "Digital / AI",
+          "owner": "SPCR pilot",
+          "keywords": [
+            "cybersecurity"
+          ],
+          "weight": 5,
+          "position": "Prefer proportionate, harmonised and innovation-friendly digital regulation."
+        },
+        {
+          "priority_id": "DEF-001",
+          "topic": "Defence / resilience",
+          "owner": "SPCR pilot",
+          "keywords": [
+            "resilience",
+            "security"
+          ],
+          "weight": 5,
+          "position": "Support stronger European industrial capacity, preparedness and resilient supply chains."
+        }
+      ],
+      "detected_at": "2026-10-03T08:33:25.323909+00:00",
+      "is_current": true
     }
   ]
 }
