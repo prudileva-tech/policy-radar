@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Policy Radar — Free Pilot</title>
+<style>
+:root{--bg:#f6f6f2;--ink:#10110f;--muted:#6e7168;--card:#fff;--line:#dedfd7;--high:#b42318;--med:#a15c00;--accent:#17472f}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{max-width:1180px;margin:auto;padding:34px 22px 70px}.top{display:flex;justify-content:space-between;gap:24px;align-items:flex-end}.eyebrow{letter-spacing:.14em;text-transform:uppercase;font-size:12px;color:var(--accent);font-weight:800}.title{font-size:42px;line-height:1;margin:8px 0 7px}.sub{color:var(--muted)}.stamp{text-align:right;color:var(--muted);font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0}.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}.num{font-size:29px;font-weight:800}.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.09em}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px}select,input{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit}.search{min-width:280px;flex:1}
+.grid{display:grid;grid-template-columns:2.1fr .9fr;gap:18px}.list,.side{display:flex;flex-direction:column;gap:11px}.item,.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:17px 18px}.meta{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px}.pill{font-size:11px;font-weight:750;border-radius:999px;padding:4px 8px;background:#f0f1eb}.pill.high{background:#fee4e2;color:var(--high)}.pill.medium{background:#fff0d4;color:var(--med)}.item h3{margin:0 0 7px;font-size:17px;line-height:1.32}.item a{color:inherit;text-decoration:none}.item a:hover{text-decoration:underline}.desc{color:var(--muted);font-size:13px;line-height:1.45}.matches{margin-top:10px;font-size:12px;color:var(--accent)}.panel h2{font-size:15px;margin:0 0 12px}.priority{padding:10px 0;border-top:1px solid var(--line)}.priority:first-of-type{border-top:0}.priority b{font-size:13px}.priority p{font-size:12px;color:var(--muted);margin:4px 0 0}.health{font-size:12px;display:flex;justify-content:space-between;gap:10px;padding:6px 0}.ok{color:#18794e}.error{color:var(--high)}.empty{padding:30px;color:var(--muted);text-align:center}.footer{margin-top:26px;color:var(--muted);font-size:12px}
+@media(max-width:800px){.stats{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.stamp{text-align:left}.title{font-size:34px}}
+</style>
+</head>
+<body><main class="wrap">
+<div class="top"><div><div class="eyebrow">SPČR policy intelligence · pilot</div><h1 class="title">Policy Radar</h1><div class="sub">Daily CZ/EU public-source monitoring — zero-cost pilot, no paid AI.</div></div><div class="stamp" id="stamp">Loading…</div></div>
+<section class="stats"><div class="stat"><div class="num" id="sNew">–</div><div class="label">new</div></div><div class="stat"><div class="num" id="sChanged">–</div><div class="label">changed</div></div><div class="stat"><div class="num" id="sHigh">–</div><div class="label">high relevance</div></div><div class="stat"><div class="num" id="sMedium">–</div><div class="label">medium</div></div></section>
+<div class="controls"><select id="jur"><option>ALL</option><option>EU</option><option>CZ</option></select><select id="rel"><option>ALL</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select><input class="search" id="q" placeholder="Search title, source, priority…" /></div>
+<div class="grid"><section class="list" id="list"></section><aside class="side"><div class="panel"><h2>Tracked priorities</h2><div id="priorities"></div></div><div class="panel"><h2>Source health</h2><div id="health"></div></div></aside></div>
+<div class="footer">Pilot logic: official/public feeds → change detection → rule-based priority matching. AI assessment is intentionally disabled in the free phase.</div>
+</main>
+<script>
+let DATA=null;
+const esc=s=>(s??'').toString().replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function render(){
+ const jur=document.querySelector('#jur').value, rel=document.querySelector('#rel').value, q=document.querySelector('#q').value.toLowerCase();
+ const items=DATA.items.filter(i=>(jur==='ALL'||i.jurisdiction===jur)&&(rel==='ALL'||i.relevance===rel)&&(!q||JSON.stringify(i).toLowerCase().includes(q)));
+ document.querySelector('#list').innerHTML=items.length?items.map(i=>`<article class="item"><div class="meta"><span class="pill">${esc(i.jurisdiction)}</span><span class="pill">${esc(i.status)}</span><span class="pill ${i.relevance.toLowerCase()}">${esc(i.relevance)}</span><span class="pill">${esc(i.source)}</span></div><h3><a href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.title)}</a></h3><div class="desc">${esc(i.text).slice(0,360)}</div>${i.matches?.length?`<div class="matches">Matches: ${i.matches.map(m=>esc(m.topic)+' ('+m.keywords.map(esc).join(', ')+')').join(' · ')}</div>`:''}</article>`).join(''):'<div class="panel empty">No matching items.</div>';
+}
+fetch('./data/radar.json?'+Date.now()).then(r=>r.json()).then(d=>{
+ DATA=d; const s=d.stats; sNew.textContent=s.new;sChanged.textContent=s.changed;sHigh.textContent=s.high;sMedium.textContent=s.medium;stamp.textContent='Updated '+new Date(d.generated_at).toLocaleString();
+ priorities.innerHTML=d.priorities.map(p=>`<div class="priority"><b>${esc(p.id)} · ${esc(p.topic)}</b><p>${esc(p.position)}</p></div>`).join('');
+ health.innerHTML=d.health.map(h=>`<div class="health"><span>${esc(h.source)}</span><span class="${h.status==='OK'?'ok':'error'}">${esc(h.status)}${h.status==='OK'?' · '+h.count:''}</span></div>`).join(''); render();
+}).catch(e=>{list.innerHTML='<div class="panel empty">No radar data yet. Run the collector once.</div>';stamp.textContent='Waiting for first run';});
+['jur','rel','q'].forEach(id=>document.querySelector('#'+id).addEventListener(id==='q'?'input':'change',render));
+</script></body></html>
