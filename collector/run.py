@@ -1,6 +1,6 @@
 from __future__ import annotations
 import hashlib, html, json, re, sys, time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -14,7 +14,8 @@ SOURCES = json.loads((ROOT / "config/sources.json").read_text(encoding="utf-8"))
 PRIORITIES = json.loads((ROOT / "config/priorities.json").read_text(encoding="utf-8"))
 OUT = ROOT / "docs/data/radar.json"
 STATE = ROOT / "docs/data/state.json"
-UA = "PolicyRadarPilot/0.1 (+public legislative monitoring; GitHub Actions)"
+ARCHIVE = ROOT / "docs/data/archive.json"
+UA = "PolicyRadarPilot/0.2 (+public legislative monitoring; GitHub Actions)"
 
 def clean(text: str) -> str:
     text = BeautifulSoup(html.unescape(text or ""), "html.parser").get_text(" ", strip=True)
@@ -24,16 +25,20 @@ def iso_date(value) -> str | None:
     if not value:
         return None
     try:
-        return dateparser.parse(str(value)).astimezone(timezone.utc).isoformat()
+        return dateparser.parse(str(value), dayfirst=True).astimezone(timezone.utc).isoformat()
     except Exception:
         return None
 
-def fetch_rss(source):
-    r = requests.get(source["url"], timeout=35, headers={"User-Agent": UA})
+def request(url):
+    r = requests.get(url, timeout=40, headers={"User-Agent": UA})
     r.raise_for_status()
+    return r
+
+def fetch_rss(source):
+    r = request(source["url"])
     feed = feedparser.parse(r.content)
     rows = []
-    for e in feed.entries[:80]:
+    for e in feed.entries[:100]:
         title = clean(e.get("title", "Untitled"))
         link = e.get("link") or source["url"]
         summary = clean(e.get("summary") or e.get("description") or "")
@@ -43,9 +48,7 @@ def fetch_rss(source):
     return rows
 
 def fetch_veklep(source):
-    r = requests.get(source["url"], timeout=35, headers={"User-Agent": UA})
-    r.raise_for_status()
-    soup = BeautifulSoup(r.text, "html.parser")
+    soup = BeautifulSoup(request(source["url"]).text, "html.parser")
     rows, seen = [], set()
     for a in soup.select('a[href*="/portal/veklep/material/"]'):
         href = a.get("href", "")
@@ -55,45 +58,131 @@ def fetch_veklep(source):
         if url in seen:
             continue
         seen.add(url)
+        parent = a.find_parent(["article", "div", "li", "tr"])
         title = clean(a.get_text(" ", strip=True))
-        if len(title) < 12:
-            parent = a.find_parent(["article", "div", "li", "tr"])
-            title = clean(parent.get_text(" ", strip=True)) if parent else title
-        if len(title) < 12:
+        context = clean(parent.get_text(" ", strip=True)) if parent else title
+        if len(title) < 8:
+            title = context
+        if len(title) < 8:
             continue
-        external_id = href.rstrip("/").split("/")[-1]
-        rows.append({"external_id": external_id, "title": title[:500], "url": url, "text": title, "published_at": None})
-    return rows[:100]
+        rows.append({
+            "external_id": href.rstrip("/").split("/")[-1],
+            "title": title[:500],
+            "url": url,
+            "text": context[:1200],
+            "published_at": None,
+            "procedure_stage": "VeKLEP / příprava vlády"
+        })
+    return rows[:150]
 
-def infer_metadata(source, title: str, text: str):
+def psp_pages(source):
+    first = request(source["url"])
+    soup = BeautifulSoup(first.text, "html.parser")
+    urls = {source["url"]}
+    mode = "stz=1" if "stz=1" in source["url"] else "tx=1"
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        if "tisky.sqw" in href and mode in href:
+            urls.add(urljoin(source["url"], href))
+    return list(urls)[:15]
+
+def fetch_psp(source):
+    rows, seen = [], set()
+    for page_url in psp_pages(source):
+        soup = BeautifulSoup(request(page_url).text, "html.parser")
+        current_date = None
+        for tr in soup.find_all("tr"):
+            cells = [clean(td.get_text(" ", strip=True)) for td in tr.find_all(["td","th"])]
+            if not cells:
+                continue
+            joined = " | ".join(cells)
+            dm = re.search(r"(\d{1,2}\.\s*[^\d|]{3,15}\s*202\d)", joined, re.I)
+            if dm and len(cells) <= 2:
+                current_date = iso_date(dm.group(1))
+                continue
+            a = tr.find("a", href=True)
+            if len(cells) < 2 or not a:
+                continue
+            href = a.get("href", "")
+            if not any(x in href for x in ["historie.sqw", "tiskt.sqw"]):
+                continue
+            url = urljoin(page_url, href)
+            key = clean(cells[0]) + "|" + url
+            if key in seen:
+                continue
+            seen.add(key)
+            number = clean(cells[0])
+            title = clean(cells[1]) if len(cells) > 1 else clean(a.get_text(" ", strip=True))
+            doc_type = clean(cells[2]) if len(cells) > 2 else "Sněmovní dokument"
+            stage = clean(cells[3]) if len(cells) > 3 else ""
+            if not title or title.lower() in ["krátký název", "název"]:
+                continue
+            rows.append({
+                "external_id": re.sub(r"\s+", "", number) or url,
+                "title": title,
+                "url": url,
+                "text": f"{doc_type}. {stage}".strip(),
+                "published_at": current_date,
+                "procedure_stage": stage,
+                "source_doc_type": doc_type,
+                "parliament_number": number
+            })
+    return rows[:500]
+
+def fetch_senate(source):
+    soup = BeautifulSoup(request(source["url"]).text, "html.parser")
+    rows, seen = [], set()
+    for tr in soup.find_all("tr"):
+        cells = [clean(td.get_text(" ", strip=True)) for td in tr.find_all(["td","th"])]
+        if len(cells) < 4:
+            continue
+        if cells[0].lower().startswith("obdob"):
+            continue
+        number = cells[-2]
+        title = cells[-1]
+        if not re.search(r"\d", number) or len(title) < 5:
+            continue
+        a = tr.find("a", href=True)
+        url = urljoin(source["url"], a["href"]) if a else source["url"]
+        key = f"{number}|{title}"
+        if key in seen:
+            continue
+        seen.add(key)
+        published = iso_date(cells[2]) if len(cells) >= 5 else None
+        rows.append({
+            "external_id": key,
+            "title": title,
+            "url": url,
+            "text": f"Senátní tisk {number}. Schůze {cells[1] if len(cells)>1 else ''}.",
+            "published_at": published,
+            "procedure_stage": "Senát",
+            "source_doc_type": "Senátní tisk",
+            "parliament_number": number
+        })
+    return rows[:250]
+
+def infer_metadata(source, row):
+    title, text = row["title"], row.get("text","")
     hay = f"{title} {text}".lower()
-
-    # Human-readable document type. This is intentionally heuristic in the free pilot.
-    if source["id"] == "veklep":
-        doc_type = "CZ legislative material"
+    if row.get("source_doc_type"):
+        doc_type = row["source_doc_type"]
+    elif source["id"] == "veklep":
+        doc_type = "Vládní legislativní materiál"
     elif "coreper" in source["id"]:
         doc_type = "COREPER agenda / meeting item"
-    elif "working parties" in source["name"].lower() or "wp" in source["id"]:
+    elif "wp" in source["id"]:
         doc_type = "Council working party item"
-    elif "council_latest" == source["id"]:
+    elif source["id"] == "council_latest":
         doc_type = "Council document"
     elif "eurlex" in source["id"]:
-        if "directive" in hay:
-            doc_type = "EU directive / related act"
-        elif "regulation" in hay:
-            doc_type = "EU regulation / related act"
-        elif "decision" in hay:
-            doc_type = "EU decision / related act"
-        else:
-            doc_type = "EUR-Lex legal document"
+        doc_type = "EU regulation / related act" if "regulation" in hay else ("EU directive / related act" if "directive" in hay else "EUR-Lex legal document")
     elif "ep_" in source["id"]:
         doc_type = "European Parliament item"
     else:
         doc_type = "Policy document"
 
-    # Commentability: only assert YES when the feed text itself signals a consultation/call.
-    consultation_words = ["consultation", "call for evidence", "feedback period", "public consultation",
-                          "připomínkové řízení", "meziresortní připomínkové řízení", "připomínky do"]
+    consultation_words = ["consultation","call for evidence","feedback period","public consultation",
+                          "připomínkové řízení","meziresortní připomínkové řízení","připomínky do"]
     if any(w in hay for w in consultation_words):
         commentability = "YES"
     elif source["id"] == "veklep":
@@ -101,28 +190,24 @@ def infer_metadata(source, title: str, text: str):
     else:
         commentability = "NO_SIGNAL"
 
-    # Best-effort deadline extraction near words such as deadline / until / do.
     deadline = None
-    patterns = [
+    for p in [
         r"(?:deadline|until|by)\s*[:\-]?\s*(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})",
         r"(?:deadline|until|by)\s*[:\-]?\s*([A-Za-z]+\s+\d{1,2},?\s+\d{4})",
-        r"(?:připomínky\s+do|lhůta\s+do|do)\s+(\d{1,2}[.]\s*\d{1,2}[.]\s*\d{4})"
-    ]
-    for p in patterns:
-        m = re.search(p, hay, flags=re.IGNORECASE)
+        r"(?:připomínky\s+do|lhůta\s+do)\s+(\d{1,2}[.]\s*\d{1,2}[.]\s*\d{4})"
+    ]:
+        m = re.search(p, hay, re.I)
         if m:
             deadline = m.group(1)
             break
 
-    # Short deterministic summary for the free phase.
-    summary = clean(text)[:260]
+    stage = row.get("procedure_stage") or ""
+    summary = clean(text)[:280]
+    if stage and stage.lower() not in summary.lower():
+        summary = (stage + ". " + summary).strip()
     if not summary:
-        if "meeting" in doc_type.lower() or "agenda" in doc_type.lower() or "working party" in doc_type.lower():
-            summary = "Upcoming EU meeting or working-party item. Open the source for agenda and supporting documents."
-        else:
-            summary = "New or updated public policy item. Open the source for the full document and procedural context."
-
-    return doc_type, commentability, deadline, summary
+        summary = "Veřejně dostupná položka v legislativním procesu. Otevřete zdroj pro detail."
+    return doc_type, commentability, deadline, summary, stage
 
 def classify(title: str, text: str):
     hay = f"{title} {text}".lower()
@@ -134,120 +219,151 @@ def classify(title: str, text: str):
             score += local
             matches.append({"priority_id": p["id"], "topic": p["topic"], "owner": p["owner"], "keywords": hit, "weight": p["weight"], "position": p["position"]})
     relevance = "HIGH" if score >= 15 else ("MEDIUM" if score >= 6 else "LOW")
-    urgency_words = ["deadline", "consultation", "amendment", "coreper", "trilogue", "vote", "meeting", "připomín", "lhůt", "jednání vlády"]
+    urgency_words = ["deadline","consultation","amendment","coreper","trilogue","trialogue","vote","meeting",
+                     "pozměňovací","3. čtení","2. čtení","připomín","lhůt","jednání vlády"]
     urgency = "HIGH" if any(w in hay for w in urgency_words) and relevance != "LOW" else ("MEDIUM" if relevance != "LOW" else "LOW")
     return relevance, urgency, matches, score
 
-def load_state():
-    if STATE.exists():
-        try:
-            return json.loads(STATE.read_text(encoding="utf-8"))
-        except Exception:
-            pass
-    return {}
+def load_json(path, default):
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return default
+
+def weekly_score(item):
+    if not any(m.get("priority_id") == "DIG-001" for m in item.get("matches", [])):
+        return -1
+    hay = f"{item.get('title','')} {item.get('text','')} {item.get('procedure_stage','')}".lower()
+    s = item.get("score", 0)
+    boosts = {
+        "trilogue": 35, "trialogue": 35, "coreper": 28, "3. čtení": 25,
+        "pozměňovací": 24, "amendment": 24, "2. čtení": 20, "vote": 18,
+        "consultation": 18, "deadline": 18, "výbor": 12, "committee": 12,
+        "working party": 10
+    }
+    for word, pts in boosts.items():
+        if word in hay:
+            s += pts
+    if item.get("status") == "CHANGED":
+        s += 15
+    elif item.get("status") == "NEW":
+        s += 10
+    if item.get("comment_deadline"):
+        s += 15
+    return s
 
 def main():
-    now = datetime.now(timezone.utc).isoformat()
-    state = load_state()
+    now_dt = datetime.now(timezone.utc)
+    now = now_dt.isoformat()
+    state = load_json(STATE, {})
+    archive = load_json(ARCHIVE, {})
     next_state = dict(state)
-    items, health = [], []
+    current_items, health = [], []
+    seen_keys = set()
+
     for source in SOURCES:
         started = time.time()
         try:
-            if source["kind"] == "rss":
-                rows = fetch_rss(source)
-            elif source["kind"] == "veklep":
-                rows = fetch_veklep(source)
-            else:
-                raise ValueError(f"Unknown source kind: {source['kind']}")
-            health.append({"source": source["name"], "status": "OK", "count": len(rows), "seconds": round(time.time()-started, 2)})
+            kind = source["kind"]
+            rows = fetch_rss(source) if kind == "rss" else fetch_veklep(source) if kind == "veklep" else fetch_psp(source) if kind == "psp" else fetch_senate(source) if kind == "senate" else []
+            health.append({"source": source["name"], "status": "OK", "count": len(rows), "seconds": round(time.time()-started,2)})
         except Exception as exc:
-            health.append({"source": source["name"], "status": "ERROR", "count": 0, "error": str(exc)[:220], "seconds": round(time.time()-started, 2)})
+            health.append({"source": source["name"], "status": "ERROR", "count": 0, "error": str(exc)[:220], "seconds": round(time.time()-started,2)})
             continue
+
         for row in rows:
             key = f"{source['id']}::{row['external_id']}"
-            fingerprint = hashlib.sha256((row["title"] + "\n" + row["text"]).encode("utf-8", errors="ignore")).hexdigest()
+            seen_keys.add(key)
+            fingerprint = hashlib.sha256((row["title"]+"\n"+row.get("text","")+"\n"+row.get("procedure_stage","")).encode("utf-8", errors="ignore")).hexdigest()
             previous = state.get(key)
             status = "NEW" if previous is None else ("CHANGED" if previous != fingerprint else "UNCHANGED")
             next_state[key] = fingerprint
-            relevance, urgency, matches, score = classify(row["title"], row["text"])
-            doc_type, commentability, deadline, short_summary = infer_metadata(source, row["title"], row["text"])
+            relevance, urgency, matches, score = classify(row["title"], row.get("text",""))
+            doc_type, commentability, deadline, short_summary, stage = infer_metadata(source, row)
 
-            attention = "FYI"
-            if relevance == "HIGH" or (urgency == "HIGH" and relevance != "LOW"):
-                attention = "ACTION"
-            elif relevance == "MEDIUM" or urgency == "MEDIUM" or commentability == "YES":
-                attention = "WATCH"
-
-            reason = "No tracked priority matched yet."
+            attention = "ACTION" if relevance == "HIGH" or (urgency == "HIGH" and relevance != "LOW") else ("WATCH" if relevance == "MEDIUM" or urgency == "MEDIUM" or commentability == "YES" else "FYI")
+            reason = "Bez shody s aktuálně uloženou prioritou."
             if matches:
-                reason = "Matches: " + ", ".join(sorted({m["topic"] for m in matches}))
+                reason = "Shoda s prioritami: " + ", ".join(sorted({m["topic"] for m in matches}))
             if commentability == "YES":
-                reason += " · Public/explicit commenting signal detected."
+                reason += " · Zdroj signalizuje možnost připomínkování."
             elif commentability == "VERIFY":
-                reason += " · Check VeKLEP procedure for commenting status."
+                reason += " · Ověřit stav připomínkování ve VeKLEP."
 
-            items.append({
+            old = archive.get(key, {})
+            first_seen = old.get("first_seen", now)
+            last_changed = now if status in ("NEW","CHANGED") else old.get("last_changed", first_seen)
+            events = old.get("events", [])
+            if status in ("NEW","CHANGED"):
+                events = ([{"at": now, "type": status, "title": row["title"], "stage": stage}] + events)[:30]
+
+            item = {
                 **row,
-                "source_id": source["id"],
-                "source": source["name"],
-                "jurisdiction": source["jurisdiction"],
-                "status": status,
-                "relevance": relevance,
-                "urgency": urgency,
-                "attention": attention,
-                "document_type": doc_type,
-                "commentability": commentability,
-                "comment_deadline": deadline,
-                "short_summary": short_summary,
-                "why_it_matters": reason,
-                "score": score,
-                "matches": matches,
-                "detected_at": now
-            })
-    attention_rank = {"ACTION": 0, "WATCH": 1, "FYI": 2}
-    items.sort(key=lambda x: (attention_rank.get(x["attention"], 9), x["status"] != "NEW", {"HIGH":0,"MEDIUM":1,"LOW":2}[x["relevance"]], x["title"].lower()))
-    # Keep all relevant/changed items, plus a recent baseline from each jurisdiction
-    # so the dashboard never looks empty just because nothing urgent changed today.
-    important = [i for i in items if i["attention"] != "FYI" or i["status"] in ("NEW", "CHANGED")]
-    def baseline(jurisdiction, limit=18):
-        rows = [i for i in items if i["jurisdiction"] == jurisdiction]
-        rows.sort(key=lambda x: (x.get("published_at") or x.get("detected_at") or ""), reverse=True)
-        return rows[:limit]
-    merged = []
-    seen = set()
-    for i in important + baseline("CZ") + baseline("EU"):
-        key = (i["source_id"], i["external_id"])
-        if key not in seen:
-            seen.add(key)
-            merged.append(i)
-    items = merged
+                "key": key, "source_id": source["id"], "source": source["name"], "jurisdiction": source["jurisdiction"],
+                "status": status, "relevance": relevance, "urgency": urgency, "attention": attention,
+                "document_type": doc_type, "commentability": commentability, "comment_deadline": deadline,
+                "short_summary": short_summary, "why_it_matters": reason, "procedure_stage": stage,
+                "score": score, "matches": matches, "first_seen": first_seen, "last_seen": now,
+                "last_changed": last_changed, "is_current": True, "events": events, "fingerprint": fingerprint
+            }
+            archive[key] = item
+            current_items.append(item)
+
+    # Preserve historical records. Sources that no longer list a record remain searchable in History.
+    for key, old in list(archive.items()):
+        if key not in seen_keys:
+            old["is_current"] = False
+
+    all_items = list(archive.values())
+    attention_rank = {"ACTION":0,"WATCH":1,"FYI":2}
+    all_items.sort(key=lambda x: (
+        not x.get("is_current",False),
+        attention_rank.get(x.get("attention","FYI"),9),
+        -(weekly_score(x) if weekly_score(x) >= 0 else 0),
+        x.get("last_changed","")
+    ))
+
+    digital = [i for i in all_items if i.get("is_current") and weekly_score(i) >= 0]
+    digital.sort(key=weekly_score, reverse=True)
+    top3 = []
+    used = set()
+    for i in digital:
+        signature = re.sub(r"\W+"," ",i.get("title","").lower()).strip()[:100]
+        if signature in used:
+            continue
+        used.add(signature)
+        top3.append({
+            "key": i["key"], "title": i["title"], "url": i["url"], "jurisdiction": i["jurisdiction"],
+            "document_type": i["document_type"], "procedure_stage": i.get("procedure_stage") or "",
+            "attention": i["attention"], "status": i["status"], "short_summary": i["short_summary"],
+            "why_it_matters": i["why_it_matters"], "score": weekly_score(i), "comment_deadline": i.get("comment_deadline")
+        })
+        if len(top3) == 3:
+            break
 
     payload = {
-        "generated_at": now,
-        "mode": "free-pilot-no-ai",
-        "stats": {
-            "total": len(items),
-            "new": sum(i["status"] == "NEW" for i in items),
-            "changed": sum(i["status"] == "CHANGED" for i in items),
-            "high": sum(i["relevance"] == "HIGH" for i in items),
-            "medium": sum(i["relevance"] == "MEDIUM" for i in items),
-            "action": sum(i["attention"] == "ACTION" for i in items),
-            "watch": sum(i["attention"] == "WATCH" for i in items),
-            "cz": sum(i["jurisdiction"] == "CZ" for i in items),
-            "eu": sum(i["jurisdiction"] == "EU" for i in items),
-            "cz_source_total": sum(h.get("count", 0) for h in health if "VeKLEP" in h.get("source","")),
-            "eu_source_total": sum(h.get("count", 0) for h in health if "VeKLEP" not in h.get("source",""))
+        "generated_at": now, "mode":"free-pilot-no-ai",
+        "stats":{
+            "total": len(all_items),
+            "current": sum(bool(i.get("is_current")) for i in all_items),
+            "new": sum(i.get("status")=="NEW" for i in current_items),
+            "changed": sum(i.get("status")=="CHANGED" for i in current_items),
+            "action": sum(i.get("attention")=="ACTION" and i.get("is_current") for i in all_items),
+            "watch": sum(i.get("attention")=="WATCH" and i.get("is_current") for i in all_items),
+            "cz": sum(i.get("jurisdiction")=="CZ" and i.get("is_current") for i in all_items),
+            "eu": sum(i.get("jurisdiction")=="EU" and i.get("is_current") for i in all_items)
         },
+        "top_digital_week": top3,
         "health": health,
-        "items": items[:300],
+        "items": all_items[:1200],
         "priorities": PRIORITIES
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     STATE.write_text(json.dumps(next_state, ensure_ascii=False, indent=2), encoding="utf-8")
+    ARCHIVE.write_text(json.dumps(archive, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(payload["stats"], ensure_ascii=False))
-    if not any(h["status"] == "OK" for h in health):
+    if not any(h["status"]=="OK" for h in health):
         sys.exit(2)
 
 if __name__ == "__main__":
