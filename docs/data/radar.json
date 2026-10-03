@@ -1,0 +1,20 @@
+{
+  "generated_at": "2026-10-03T06:00:00+00:00",
+  "mode": "free-pilot-no-ai",
+  "stats": {"total": 3, "new": 3, "changed": 0, "high": 2, "medium": 1},
+  "health": [
+    {"source":"EUR-Lex — Commission proposals","status":"OK","count":12},
+    {"source":"Council — latest public register documents","status":"OK","count":40},
+    {"source":"VeKLEP — public legislative materials","status":"OK","count":25}
+  ],
+  "items": [
+    {"external_id":"demo1","title":"Demo: digital regulatory proposal detected","url":"https://eur-lex.europa.eu/","text":"Example item showing how a digital proposal is matched against stored pilot priorities.","published_at":null,"source_id":"demo","source":"EUR-Lex — demo","jurisdiction":"EU","status":"NEW","relevance":"HIGH","urgency":"MEDIUM","score":20,"matches":[{"priority_id":"DIG-001","topic":"Digital / AI","owner":"SPCR pilot","keywords":["digital","data"],"weight":5,"position":""}],"detected_at":"2026-10-03T06:00:00+00:00"},
+    {"external_id":"demo2","title":"Demo: Council resilience document","url":"https://www.consilium.europa.eu/en/documents/public-register/","text":"Example Council document mentioning preparedness, resilience and supply chains.","published_at":null,"source_id":"demo","source":"Council — demo","jurisdiction":"EU","status":"NEW","relevance":"HIGH","urgency":"MEDIUM","score":20,"matches":[{"priority_id":"DEF-001","topic":"Defence / resilience","owner":"SPCR pilot","keywords":["preparedness","resilience","supply chain"],"weight":5,"position":""}],"detected_at":"2026-10-03T06:00:00+00:00"},
+    {"external_id":"demo3","title":"Demo: Czech material in VeKLEP","url":"https://www.odok.gov.cz/portal/veklep/materialy","text":"Example Czech legislative material entering the public pipeline.","published_at":null,"source_id":"demo","source":"VeKLEP — demo","jurisdiction":"CZ","status":"NEW","relevance":"MEDIUM","urgency":"LOW","score":8,"matches":[{"priority_id":"SIM-001","topic":"Simplification","owner":"SPCR pilot","keywords":["administrative burden"],"weight":4,"position":""}],"detected_at":"2026-10-03T06:00:00+00:00"}
+  ],
+  "priorities": [
+    {"id":"DIG-001","owner":"SPCR pilot","topic":"Digital / AI","position":"Prefer proportionate, harmonised and innovation-friendly digital regulation.","keywords":["artificial intelligence","ai act","digital omnibus","data act","cloud","cybersecurity","data","software"],"weight":5},
+    {"id":"DEF-001","owner":"SPCR pilot","topic":"Defence / resilience","position":"Support stronger European industrial capacity, preparedness and resilient supply chains.","keywords":["defence","preparedness","resilience","security","dual-use","supply chain"],"weight":5},
+    {"id":"SIM-001","owner":"SPCR pilot","topic":"Simplification","position":"Reduce duplicative reporting and unnecessary regulatory burden for businesses.","keywords":["simplification","reporting obligation","administrative burden","omnibus","competitiveness"],"weight":4}
+  ]
+}
