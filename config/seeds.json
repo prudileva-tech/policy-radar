@@ -1,0 +1,62 @@
+[
+  {
+    "external_id": "cz-seed-ai-law-2026",
+    "title": "Návrh zákona o umělé inteligenci",
+    "url": "https://vlada.gov.cz/",
+    "text": "Návrh zákona o umělé inteligenci a související změna zákona o dozoru nad trhem s výrobky. Aktivní legislativní file v české pipeline.",
+    "published_at": "2026-08-01T00:00:00+00:00",
+    "procedure_stage": "Legislativní rada vlády / další projednávání",
+    "source_doc_type": "Návrh zákona",
+    "seed_source": "Vláda ČR / legislativní plán"
+  },
+  {
+    "external_id": "cz-seed-gov-ict-ai-699-26",
+    "title": "Řízení výdajů v oblasti informačních a komunikačních technologií a umělé inteligence",
+    "url": "https://vlada.gov.cz/cz/media-centrum/aktualne/vysledky-jednani-vlady-14--zari-2026-228778/",
+    "text": "Materiál čj. 699/26 schválený vládou dne 14. září 2026; týká se řízení výdajů v oblasti ICT a AI.",
+    "published_at": "2026-09-14T00:00:00+00:00",
+    "procedure_stage": "Schváleno vládou",
+    "source_doc_type": "Vládní materiál",
+    "seed_source": "Vláda ČR"
+  },
+  {
+    "external_id": "cz-seed-critical-infra-portal-178-2026",
+    "title": "Vyhláška č. 178/2026 Sb. o portálu kritické infrastruktury",
+    "url": "https://e-sbirka.gov.cz/",
+    "text": "Prováděcí vyhláška k portálu kritické infrastruktury, vyhlášená 30. září 2026 a účinná od 1. října 2026.",
+    "published_at": "2026-09-30T00:00:00+00:00",
+    "procedure_stage": "Vyhlášeno / účinné",
+    "source_doc_type": "Vyhláška",
+    "seed_source": "e-Sbírka"
+  },
+  {
+    "external_id": "cz-seed-defence-industrial-coop-20260924",
+    "title": "Programy průmyslové spolupráce v obranném průmyslu",
+    "url": "https://mpo.gov.cz/cz/prumysl/obranny-prumysl/spoluprace-s-domacim-prumyslem/programy-prumyslove-spoluprace--294692/",
+    "text": "MPO zveřejnilo 24. září 2026 rámec programů průmyslové spolupráce se zaměřením na bezpečnost dodávek, zapojení domácího průmyslu a dodavatelské řetězce.",
+    "published_at": "2026-09-24T00:00:00+00:00",
+    "procedure_stage": "Aktuální policy / implementace",
+    "source_doc_type": "Policy materiál",
+    "seed_source": "MPO"
+  },
+  {
+    "external_id": "cz-seed-diana-20260924",
+    "title": "Obranný akcelerátor DIANA — technologie dvojího užití",
+    "url": "https://mpo.gov.cz/cz/prumysl/obranny-prumysl/spoluprace-s-domacim-prumyslem/obranny-akcelerator-diana--294690/",
+    "text": "Aktuální informace MPO k NATO DIANA a podpoře nastupujících a přelomových technologií dvojího užití s obrannou aplikací.",
+    "published_at": "2026-09-24T00:00:00+00:00",
+    "procedure_stage": "Program / příležitosti pro firmy",
+    "source_doc_type": "Defence / dual-use program",
+    "seed_source": "MPO"
+  },
+  {
+    "external_id": "cz-seed-defence-industry-20260930",
+    "title": "Spolupráce s domácím obranným a bezpečnostním průmyslem",
+    "url": "https://mpo.gov.cz/cz/prumysl/obranny-prumysl/spoluprace-s-domacim-prumyslem/spoluprace-s-domacim-prumyslem--294768/",
+    "text": "MPO 30. září 2026 aktualizovalo rámec podpory domácího obranného a bezpečnostního průmyslu, kapacit a bezpečnosti dodávek.",
+    "published_at": "2026-09-30T00:00:00+00:00",
+    "procedure_stage": "Aktuální policy / implementace",
+    "source_doc_type": "Defence policy",
+    "seed_source": "MPO"
+  }
+]
