@@ -17,16 +17,16 @@
 h3{margin:9px 0 7px;font-size:18px;line-height:1.3}h3 a{color:inherit;text-decoration:none}h3 a:hover{text-decoration:underline}
 .summary{font-size:13.5px;line-height:1.5;color:#444a42;margin-bottom:12px}.info{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}.box{background:#f7f8f4;border-radius:10px;padding:9px 10px}.box .k{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:750}.box .v{font-size:12.5px;font-weight:700;margin-top:3px}.deadline{color:var(--red)}.why{font-size:12.5px;color:var(--green);font-weight:650;border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
 .side{display:flex;flex-direction:column;gap:12px}.panel{background:#fff;border:1px solid var(--line);border-radius:15px;padding:15px}.panel h2{font-size:14px;margin:0 0 10px}.priority,.health{border-top:1px solid var(--line);padding:9px 0;font-size:12px}.priority:first-of-type,.health:first-of-type{border-top:0}.priority p{margin:4px 0;color:var(--muted);line-height:1.35}.health{display:flex;justify-content:space-between;gap:10px}.ok{color:var(--green)}.error{color:var(--red)}.empty{text-align:center;color:var(--muted);padding:30px}.footer{color:var(--muted);font-size:11.5px;margin-top:24px}
-@media(max-width:850px){.hero{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}.top{flex-direction:column;align-items:flex-start}.stamp{text-align:left}.info{grid-template-columns:1fr}.headrow{display:block}}
+@media(max-width:850px){.hero{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}.top{flex-direction:column;align-items:flex-start}.stamp{text-align:left}.info{grid-template-columns:1fr}.headrow{display:block}#overview>div{grid-template-columns:1fr!important}}
 </style></head>
 <body><main class="wrap">
-<div class="top"><div><div class="kicker">SPČR · Policy Intelligence Pilot</div><h1>Policy Radar</h1><div class="sub">Co dnes vyžaduje pozornost v české a evropské legislativě.</div></div><div class="stamp" id="stamp">Načítám…</div></div>
+<div class="top"><div><div class="kicker">SPČR · Policy Intelligence Pilot</div><h1>Policy Radar</h1><div class="sub">Co vyžaduje pozornost — a co je právě v legislativní pipeline v ČR a EU.</div></div><div class="stamp" id="stamp">Načítám…</div></div>
 
 <div class="hero">
-  <div class="metric action"><div class="n" id="mAction">–</div><div class="l">🔴 Action required</div></div>
-  <div class="metric watch"><div class="n" id="mWatch">–</div><div class="l">🟠 Watch</div></div>
-  <div class="metric"><div class="n" id="mCZ">–</div><div class="l">Česká úroveň</div></div>
-  <div class="metric"><div class="n" id="mEU">–</div><div class="l">EU úroveň</div></div>
+  <div class="metric action"><div class="n" id="mAction">–</div><div class="l">🔴 Vyžaduje akci</div></div>
+  <div class="metric watch"><div class="n" id="mWatch">–</div><div class="l">🟠 Sledovat</div></div>
+  <div class="metric"><div class="n" id="mCZ">–</div><div class="l">🇨🇿 ČR v přehledu</div><div class="sub" id="mCZsub"></div></div>
+  <div class="metric"><div class="n" id="mEU">–</div><div class="l">🇪🇺 EU v přehledu</div><div class="sub" id="mEUsub"></div></div>
 </div>
 
 <div class="tabs">
@@ -42,7 +42,10 @@ h3{margin:9px 0 7px;font-size:18px;line-height:1.3}h3 a{color:inherit;text-decor
 </div>
 
 <div class="layout">
-<section class="cards" id="list"></section>
+<section>
+  <div id="overview"></div>
+  <div class="cards" id="list"></div>
+</section>
 <aside class="side">
   <div class="panel"><h2>Sledované priority</h2><div id="priorities"></div></div>
   <div class="panel"><h2>Zdraví zdrojů</h2><div id="health"></div></div>
@@ -56,10 +59,7 @@ let DATA=null, JUR='ALL';
 const esc=s=>(s??'').toString().replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const commentLabel=x=>x==='YES'?'ANO':x==='VERIFY'?'OVĚŘIT':'NEZJIŠTĚNO';
 const attLabel=x=>x==='ACTION'?'ACTION':x==='WATCH'?'WATCH':'FYI';
-function render(){
- const att=attention.value, com=comment.value, q=document.querySelector('#q').value.toLowerCase();
- let items=DATA.items.filter(i=>(JUR==='ALL'||i.jurisdiction===JUR)&&(att==='ALL'||i.attention===att)&&(com==='ALL'||i.commentability===com)&&(!q||JSON.stringify(i).toLowerCase().includes(q)));
- list.innerHTML=items.length?items.map(i=>`
+function card(i){ return `
  <article class="card ${(i.attention||'FYI').toLowerCase()}">
   <div class="headrow"><div class="badges">
    <span class="badge ${(i.attention||'FYI').toLowerCase()}">${attLabel(i.attention)}</span>
@@ -75,10 +75,23 @@ function render(){
     <div class="box"><div class="k">Zdroj</div><div class="v">${esc(i.source)}</div></div>
   </div>
   <div class="why">Proč to řešit: ${esc(i.why_it_matters||'Bez přiřazené priority.')}</div>
- </article>`).join(''):'<div class="panel empty">Žádné položky pro zvolený filtr.</div>';
+ </article>`; }
+function render(){
+ const att=attention.value, com=comment.value, q=document.querySelector('#q').value.toLowerCase();
+ let items=DATA.items.filter(i=>(JUR==='ALL'||i.jurisdiction===JUR)&&(att==='ALL'||i.attention===att)&&(com==='ALL'||i.commentability===com)&&(!q||JSON.stringify(i).toLowerCase().includes(q)));
+ list.innerHTML=items.length?items.map(card).join(''):'<div class="panel empty">Žádné položky pro zvolený filtr.</div>';
+ if(JUR==='ALL' && att==='ALL' && com==='ALL' && !q){
+   const cz=DATA.items.filter(i=>i.jurisdiction==='CZ').slice(0,5);
+   const eu=DATA.items.filter(i=>i.jurisdiction==='EU').slice(0,5);
+   overview.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div class="panel"><h2>🇨🇿 Česko — aktuálně v pipeline</h2><div style="color:var(--muted);font-size:12px;margin-bottom:8px">Poslední veřejné materiály z VeKLEP, i když zatím nejsou označené jako urgentní.</div>${cz.length?cz.map(i=>`<div class="priority"><b><a href="${esc(i.url)}" target="_blank" style="color:inherit;text-decoration:none">${esc(i.title)}</a></b><p>${esc(i.document_type||'CZ legislative material')} · ${esc(i.status)}</p></div>`).join(''):'<div class="empty">Žádné české položky.</div>'}</div>
+      <div class="panel"><h2>🇪🇺 EU — aktuálně v pipeline</h2><div style="color:var(--muted);font-size:12px;margin-bottom:8px">Nejnovější položky z EUR-Lex, Rady a EP.</div>${eu.length?eu.map(i=>`<div class="priority"><b><a href="${esc(i.url)}" target="_blank" style="color:inherit;text-decoration:none">${esc(i.title)}</a></b><p>${esc(i.document_type||'EU policy item')} · ${esc(i.status)}</p></div>`).join(''):'<div class="empty">Žádné EU položky.</div>'}</div>
+    </div>`;
+ } else overview.innerHTML='';
 }
 fetch('./data/radar.json?'+Date.now()).then(r=>r.json()).then(d=>{
- DATA=d; const s=d.stats||{}; mAction.textContent=s.action??d.items.filter(x=>x.attention==='ACTION').length; mWatch.textContent=s.watch??d.items.filter(x=>x.attention==='WATCH').length; mCZ.textContent=s.cz??d.items.filter(x=>x.jurisdiction==='CZ').length; mEU.textContent=s.eu??d.items.filter(x=>x.jurisdiction==='EU').length;
+ DATA=d; const s=d.stats||{}; mAction.textContent=s.action??d.items.filter(x=>x.attention==='ACTION').length; mWatch.textContent=s.watch??d.items.filter(x=>x.attention==='WATCH').length; mCZ.textContent=s.cz??d.items.filter(x=>x.jurisdiction==='CZ').length; mEU.textContent=s.eu??d.items.filter(x=>x.jurisdiction==='EU').length; mCZsub.textContent=(s.cz_source_total??0)+' nalezeno ve zdroji'; mEUsub.textContent=(s.eu_source_total??0)+' nalezeno ve zdrojích';
  stamp.textContent='Aktualizováno '+new Date(d.generated_at).toLocaleString('cs-CZ');
  priorities.innerHTML=d.priorities.map(p=>`<div class="priority"><b>${esc(p.topic)}</b><p>${esc(p.position)}</p></div>`).join('');
  health.innerHTML=d.health.map(h=>`<div class="health"><span>${esc(h.source)}</span><span class="${h.status==='OK'?'ok':'error'}">${esc(h.status)} · ${h.count??0}</span></div>`).join('');
