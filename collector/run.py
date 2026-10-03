@@ -12,6 +12,7 @@ from dateutil import parser as dateparser
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = json.loads((ROOT / "config/sources.json").read_text(encoding="utf-8"))
 PRIORITIES = json.loads((ROOT / "config/priorities.json").read_text(encoding="utf-8"))
+SEEDS = json.loads((ROOT / "config/seeds.json").read_text(encoding="utf-8")) if (ROOT / "config/seeds.json").exists() else []
 OUT = ROOT / "docs/data/radar.json"
 STATE = ROOT / "docs/data/state.json"
 ARCHIVE = ROOT / "docs/data/archive.json"
@@ -161,6 +162,32 @@ def fetch_senate(source):
         })
     return rows[:250]
 
+def fetch_generic_html(source):
+    soup = BeautifulSoup(request(source["url"]).text, "html.parser")
+    rows, seen = [], set()
+    for a in soup.find_all("a", href=True):
+        title = clean(a.get_text(" ", strip=True))
+        if len(title) < 18:
+            continue
+        url = urljoin(source["url"], a["href"])
+        if url in seen or url.startswith("javascript:"):
+            continue
+        seen.add(url)
+        parent = a.find_parent(["article","li","div","tr"])
+        context = clean(parent.get_text(" ", strip=True)) if parent else title
+        hay = (title + " " + context).lower()
+        relevant_terms = ["uměl", "digit", "kyber", "cloud", "data", "informač", "kritick", "obrann", "vojensk", "dvojí", "dual", "bezpečnost", "diana", "technolog", "export"]
+        if not any(t in hay for t in relevant_terms):
+            continue
+        dm = re.search(r"(\d{1,2}\.\s*\d{1,2}\.\s*202\d|\d{1,2}\.\s*[a-zá-ž]+\s*202\d)", context, re.I)
+        published = iso_date(dm.group(1)) if dm else None
+        rows.append({
+            "external_id": hashlib.sha1(url.encode()).hexdigest()[:18],
+            "title": title[:500], "url": url, "text": context[:1500],
+            "published_at": published, "procedure_stage": "Aktuální resortní / regulační materiál"
+        })
+    return rows[:120]
+
 def infer_metadata(source, row):
     title, text = row["title"], row.get("text","")
     hay = f"{title} {text}".lower()
@@ -265,7 +292,7 @@ def main():
         started = time.time()
         try:
             kind = source["kind"]
-            rows = fetch_rss(source) if kind == "rss" else fetch_veklep(source) if kind == "veklep" else fetch_psp(source) if kind == "psp" else fetch_senate(source) if kind == "senate" else []
+            rows = fetch_rss(source) if kind == "rss" else fetch_veklep(source) if kind == "veklep" else fetch_psp(source) if kind == "psp" else fetch_senate(source) if kind == "senate" else fetch_generic_html(source) if kind == "generic_html" else []
             health.append({"source": source["name"], "status": "OK", "count": len(rows), "seconds": round(time.time()-started,2)})
         except Exception as exc:
             health.append({"source": source["name"], "status": "ERROR", "count": 0, "error": str(exc)[:220], "seconds": round(time.time()-started,2)})
@@ -308,6 +335,31 @@ def main():
             }
             archive[key] = item
             current_items.append(item)
+
+    # Merge verified Czech seed items so the pilot is useful even when an official site changes markup.
+    seed_source = {"id":"verified_seed","name":"Ověřené aktuální CZ položky","jurisdiction":"CZ"}
+    for row in SEEDS:
+        key = f"verified_seed::{row['external_id']}"
+        seen_keys.add(key)
+        relevance, urgency, matches, score = classify(row["title"], row.get("text",""))
+        doc_type = row.get("source_doc_type","Policy item")
+        stage = row.get("procedure_stage","")
+        old = archive.get(key,{})
+        fingerprint = hashlib.sha256((row["title"]+"\n"+row.get("text","")+"\n"+stage).encode()).hexdigest()
+        previous = state.get(key)
+        status = "NEW" if previous is None else ("CHANGED" if previous != fingerprint else "UNCHANGED")
+        next_state[key] = fingerprint
+        attention = "ACTION" if relevance=="HIGH" or (urgency=="HIGH" and relevance!="LOW") else ("WATCH" if relevance=="MEDIUM" or urgency=="MEDIUM" else "FYI")
+        item = {**row,"key":key,"source_id":"verified_seed","source":row.get("seed_source","Ověřený zdroj"),
+                "jurisdiction":"CZ","status":status,"relevance":relevance,"urgency":urgency,"attention":attention,
+                "document_type":doc_type,"commentability":"NO_SIGNAL","comment_deadline":None,
+                "short_summary":clean(row.get("text",""))[:280],
+                "why_it_matters":"Shoda s prioritami: "+", ".join(sorted({m["topic"] for m in matches})) if matches else "Aktuální český policy/regulatory file.",
+                "score":score,"matches":matches,"first_seen":old.get("first_seen",now),"last_seen":now,
+                "last_changed":now if status in ("NEW","CHANGED") else old.get("last_changed",old.get("first_seen",now)),
+                "is_current":True,"events":old.get("events",[]),"fingerprint":fingerprint}
+        archive[key]=item
+        current_items.append(item)
 
     # Preserve historical records. Sources that no longer list a record remain searchable in History.
     for key, old in list(archive.items()):
