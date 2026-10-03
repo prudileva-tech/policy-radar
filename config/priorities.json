@@ -1,0 +1,26 @@
+[
+  {
+    "id": "DIG-001",
+    "owner": "SPCR pilot",
+    "topic": "Digital / AI",
+    "position": "Prefer proportionate, harmonised and innovation-friendly digital regulation.",
+    "keywords": ["artificial intelligence", "ai act", "digital omnibus", "data act", "cloud", "cybersecurity", "data", "software", "digital services", "digital markets"],
+    "weight": 5
+  },
+  {
+    "id": "DEF-001",
+    "owner": "SPCR pilot",
+    "topic": "Defence / resilience",
+    "position": "Support stronger European industrial capacity, preparedness and resilient supply chains.",
+    "keywords": ["defence", "defense", "preparedness", "resilience", "security", "dual-use", "supply chain", "military mobility", "edip", "safe"],
+    "weight": 5
+  },
+  {
+    "id": "SIM-001",
+    "owner": "SPCR pilot",
+    "topic": "Simplification",
+    "position": "Reduce duplicative reporting and unnecessary regulatory burden for businesses.",
+    "keywords": ["simplification", "reporting obligation", "administrative burden", "omnibus", "competitiveness", "deregulation"],
+    "weight": 4
+  }
+]
