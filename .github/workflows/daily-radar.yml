@@ -1,6 +1,12 @@
 name: Daily Policy Radar
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'collector/**'
+      - 'config/**'
+      - '.github/workflows/**'
   schedule:
     - cron: '20 4 * * 1-5'
 permissions:
